@@ -1,0 +1,146 @@
+import java.util.Collections;
+import java.util.List;
+
+LXModel buildModel() {
+  // A three-dimensional grid model
+  return new Storytime();
+}
+
+public final static float LEDS_PER_METER = 60;
+public final static float LED_SPACING = 1 * M / LEDS_PER_METER;
+public final static float SHORT_SIDE_LENGTH = 6 * IN;
+public final static float LONG_SIDE_LENGTH = (5 * M - 12 * IN) / 2;
+public final static float INTER_PANEL_SPACE = 0 * CM;
+public final static float LED_INSET = 1.5 * IN;
+
+public static class Storytime extends LXModel {
+  public final Lampshade lampshade;
+  
+  public Storytime() {
+    super(new Fixture());
+    
+    Fixture f = (Fixture)this.fixtures.get(0);
+    lampshade = f.lampshade;
+  }
+  
+  public static class Fixture extends LXAbstractFixture {
+    private final Lampshade lampshade;
+    
+    Fixture() {
+      lampshade = new Lampshade();
+      addPoints(lampshade);
+    }
+  }
+}
+
+public static class Lampshade extends LXModel {
+  public Lampshade(LXTransform t){
+    super(new Fixture(t));
+  }
+  
+  public Lampshade() {
+    this(new LXTransform());
+  }
+  
+  public static class Fixture extends LXAbstractFixture {
+    private final ArrayList<LampStrip> lampStrips = new ArrayList<LampStrip>();
+
+    Fixture(LXTransform t) {
+      t.push();
+      
+      // Bottom panel is at 0 x -9 x +35 from circle origin
+      t.push();
+      t.translate(0, -9 * IN, -35 * IN);
+      t.rotateX(radians(38.1)); // Bottom front edge
+      t.translate(0, 6 * IN, 0);
+      
+      for (int i = 0; i < 5; i++) {
+        addLampStrip(new LampStrip(t));
+        t.translate(0, SHORT_SIDE_LENGTH + INTER_PANEL_SPACE, 0);
+      }
+      t.pop();
+      
+      // Now we align the next panels based on an arc centered on the origin with radius 22"      
+      for (int i = 0; i < 10; i++) {
+        t.push();
+        t.rotateX(radians(51.9 + 14*i));
+        t.translate(0,0,-22 * IN);
+        addLampStrip(new LampStrip(t));
+        t.pop();
+      }
+      
+      // Finally we run out the last vertical panels
+      t.push();
+      t.translate(0, 0, 22 * IN);
+      for (int i = 0; i < 2; i++) {
+        addLampStrip(new LampStrip(t));
+        t.translate(0, -1 * SHORT_SIDE_LENGTH, 0);
+      }
+      t.pop();
+      
+      t.pop();
+    }
+    
+    private void addLampStrip(LampStrip strip) {
+      lampStrips.add(strip);
+      addPoints(strip);
+    }
+  }
+}
+
+public static class LampStrip extends LXModel {
+  public LampStrip(LXTransform t){
+    super(new Fixture(t));
+  }
+  
+  public LampStrip() {
+    this(new LXTransform());
+  }
+  
+  public static class Fixture extends LXAbstractFixture {
+    Fixture(LXTransform t) {
+      int shortSideLEDCount = round(LEDS_PER_METER * SHORT_SIDE_LENGTH / M);
+      int longSideLEDCount = round(LEDS_PER_METER * LONG_SIDE_LENGTH / M);
+      
+      System.out.println(LEDS_PER_METER);
+      System.out.println(LONG_SIDE_LENGTH);
+      System.out.println(longSideLEDCount);
+      System.out.println(shortSideLEDCount);
+      
+      t.push();
+      //addPoint(new LXPoint(t));
+      
+      //t.translate(LONG_SIDE_LENGTH,0,0);
+      //addPoint(new LXPoint(t));
+      
+      //t.translate(0,-1 * SHORT_SIDE_LENGTH,0);
+      //addPoint(new LXPoint(t));
+      
+      //t.translate(-1 * LONG_SIDE_LENGTH,0,0);
+      //addPoint(new LXPoint(t));
+      t.translate(LED_INSET, -1 * LED_INSET, 0);
+      
+      for (int i = 0; i < longSideLEDCount; i++) {
+         t.translate((LONG_SIDE_LENGTH - 2 * LED_INSET) / longSideLEDCount, 0, 0);
+         addPoint(new LXPoint(t));
+      }
+      
+      for (int i = 0; i < shortSideLEDCount; i++) {
+        t.translate(0, -1 * (SHORT_SIDE_LENGTH - 2 * LED_INSET) / shortSideLEDCount, 0);
+        addPoint(new LXPoint(t));
+      }
+      
+      for (int i = 0; i < longSideLEDCount; i++) {
+        t.translate(-1 * (LONG_SIDE_LENGTH - 2 * LED_INSET) / longSideLEDCount, 0, 0);
+        addPoint(new LXPoint(t));
+      }
+      
+      for (int i = 0; i < shortSideLEDCount; i++) {
+        t.translate(0, 1 * (SHORT_SIDE_LENGTH - 2 * LED_INSET) / shortSideLEDCount, 0);
+        addPoint(new LXPoint(t));
+      }
+      
+      t.pop();
+    }
+  }
+}
