@@ -30,6 +30,8 @@ public static class Storytime extends LXModel {
   public static class Fixture extends LXAbstractFixture {
     private final Lampshade lampshade;
     private final Pole pole;
+    private final Book topBook;
+    private final Book bottomBook;
     
     Fixture() {
       LXTransform origin = new LXTransform();
@@ -41,6 +43,18 @@ public static class Storytime extends LXModel {
       origin.translate(4 * FT, 1 * FT, 26 * IN);
       pole = new Pole(origin);
       addPoints(pole);
+      origin.pop();
+      
+      origin.push();
+      origin.translate(-0.5 * FT, -1 * POLE_HEIGHT + 1 * FT + 1.5 * FT, 22 * IN);
+      topBook = new Book(origin, 6 * FT, 9 * FT, 17 * IN);
+      addPoints(topBook);
+      origin.pop();
+      
+      origin.push();
+      origin.translate(-1 * FT, -1 * POLE_HEIGHT + 1 * FT + 1.5 * FT * 2, 22 * IN);
+      bottomBook = new Book(origin, 8 * FT, 10 * FT, 18.5 * IN);
+      addPoints(bottomBook);
       origin.pop();
     }
   }
@@ -101,51 +115,6 @@ public static class Lampshade extends LXModel {
   }
 }
 
-public static class Pole extends LXModel {
-  public Pole(LXTransform t){
-    super(new Fixture(t));
-  }
-  
-  public Pole() {
-    this(new LXTransform());
-  }
-  
-  public static class Fixture extends LXAbstractFixture {
-    private final ArrayList<ArrayList<LXPoint>> strips = new ArrayList<ArrayList<LXPoint>>();
-
-    Fixture(LXTransform t) {
-      // Oriented from top center of pole
-      t.push();
-      
-      final float locations[][] = {
-        {POLE_WIDTH/2, 0, -1 * POLE_WIDTH / 2}, // Front inside
-        {-1 * POLE_WIDTH/2, 0, -1 * POLE_WIDTH / 2}, // Back inside
-        {POLE_WIDTH/2, 0, 1 * POLE_WIDTH / 2}, // Front outside
-        {-1 * POLE_WIDTH/2, 0, 1 * POLE_WIDTH / 2} // Back outside
-      };
-      
-      for (int i = 0; i < locations.length; i++) {
-        ArrayList<LXPoint> strip = new ArrayList<LXPoint>();
-        
-        t.push();
-        t.translate(locations[i][0], locations[i][1], locations[i][2]); // Front inside pole strip
-        
-        for (int j = 0; j < POLE_HEIGHT / M * LEDS_PER_METER; j++) {
-          LXPoint p = new LXPoint(t);
-          addPoint(p);
-          strip.add(p);
-          t.translate(0, -1 * LED_SPACING, 0);
-        }
-        
-        strips.add(strip);
-        t.pop();
-      }
-      
-      t.pop();
-    }
-  }
-}
-
 public static class LampStrip extends LXModel {
   public LampStrip(LXTransform t){
     super(new Fixture(t));
@@ -198,6 +167,121 @@ public static class LampStrip extends LXModel {
         addPoint(new LXPoint(t));
       }
       
+      t.pop();
+    }
+  }
+}
+
+public static class Pole extends LXModel {
+  public Pole(LXTransform t){
+    super(new Fixture(t));
+  }
+  
+  public Pole() {
+    this(new LXTransform());
+  }
+  
+  public static class Fixture extends LXAbstractFixture {
+    private final ArrayList<ArrayList<LXPoint>> strips = new ArrayList<ArrayList<LXPoint>>();
+
+    Fixture(LXTransform t) {
+      // Oriented from top center of pole
+      t.push();
+      
+      final float locations[][] = {
+        {POLE_WIDTH/2, 0, -1 * POLE_WIDTH / 2}, // Front inside
+        {-1 * POLE_WIDTH/2, 0, -1 * POLE_WIDTH / 2}, // Back inside
+        {POLE_WIDTH/2, 0, 1 * POLE_WIDTH / 2}, // Front outside
+        {-1 * POLE_WIDTH/2, 0, 1 * POLE_WIDTH / 2} // Back outside
+      };
+      
+      for (int i = 0; i < locations.length; i++) {
+        ArrayList<LXPoint> strip = new ArrayList<LXPoint>();
+        
+        t.push();
+        t.translate(locations[i][0], locations[i][1], locations[i][2]); // Front inside pole strip
+        
+        for (int j = 0; j < POLE_HEIGHT / M * LEDS_PER_METER; j++) {
+          LXPoint p = new LXPoint(t);
+          addPoint(p);
+          strip.add(p);
+          t.translate(0, -1 * LED_SPACING, 0);
+        }
+        
+        strips.add(strip);
+        t.pop();
+      }
+      
+      t.pop();
+    }
+  }
+}
+
+public static class Book extends LXModel {
+  public Book(LXTransform t, float w, float l, float h){
+    super(new Fixture(t, w, l, h));
+  }
+  
+  public Book() {
+    this(new LXTransform(), 6 * FT, 10 * FT, 18 * IN);
+  }
+  
+  public static class Fixture extends LXAbstractFixture {
+    private final ArrayList<ArrayList<LXPoint>> strips = new ArrayList<ArrayList<LXPoint>>();
+
+    Fixture(LXTransform t, float w, float l, float h) {
+      // Oriented from top front left of book
+      // Two strips, separated by some distance, wrapped around the book facing out
+      
+      t.push();
+      
+      for (int j = 0; j < 2; j++) {
+        ArrayList<LXPoint> strip = new ArrayList<LXPoint>();
+
+        t.push();
+        for (int i = 0; i < w / M * LEDS_PER_METER; i++) {
+            LXPoint p = new LXPoint(t);
+            addPoint(p);
+            strip.add(p);
+            
+            t.translate(0, 0, -1 * LED_SPACING);
+            strips.add(strip);
+        }
+        
+        strip = new ArrayList<LXPoint>();
+        for (int i = 0; i < l / M * LEDS_PER_METER; i++) {
+            LXPoint p = new LXPoint(t);
+            addPoint(p);
+            strip.add(p);
+            
+            t.translate(1 * LED_SPACING, 0, 0);
+            strips.add(strip);
+        }
+        
+        strip = new ArrayList<LXPoint>();
+        for (int i = 0; i < w / M * LEDS_PER_METER; i++) {
+            LXPoint p = new LXPoint(t);
+            addPoint(p);
+            strip.add(p);
+            
+            t.translate(0, 0, 1 * LED_SPACING);
+            strips.add(strip);
+        }
+        
+        strip = new ArrayList<LXPoint>();
+        for (int i = 0; i < l / M * LEDS_PER_METER; i++) {
+            LXPoint p = new LXPoint(t);
+            addPoint(p);
+            strip.add(p);
+            
+            t.translate(-1 * LED_SPACING, 0, 0);
+            strips.add(strip);
+        }
+        t.pop();
+        
+        t.translate(0, -1 * h, 0);
+      }
+        
       t.pop();
     }
   }
