@@ -46,13 +46,15 @@ public static class Storytime extends LXModel {
       origin.pop();
       
       origin.push();
-      origin.translate(-0.5 * FT, -1 * POLE_HEIGHT + 1 * FT + 1.5 * FT, 22 * IN);
+      //origin.translate(-0.5 * FT, -1 * POLE_HEIGHT + 1 * FT + 1.5 * FT, 22 * IN);
+      origin.translate(-0.5 * FT, -1 * POLE_HEIGHT + 1 * FT + 17 * IN, 22 * IN);
       topBook = new Book(origin, 6 * FT, 9 * FT, 17 * IN);
       addPoints(topBook);
       origin.pop();
       
       origin.push();
-      origin.translate(-1 * FT, -1 * POLE_HEIGHT + 1 * FT + 1.5 * FT * 2, 22 * IN);
+      //origin.translate(-1 * FT, -1 * POLE_HEIGHT + 1 * FT + 1.5 * FT * 2, 22 * IN);
+      origin.translate(-1 * FT, -1 * POLE_HEIGHT + 1 * FT, 22 * IN + 1 * FT);
       bottomBook = new Book(origin, 8 * FT, 10 * FT, 18.5 * IN);
       addPoints(bottomBook);
       origin.pop();
