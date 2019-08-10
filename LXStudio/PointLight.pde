@@ -1,0 +1,68 @@
+// Particle (Point Light)
+// - Position
+// - Color
+// - Falloff
+
+@LXCategory("Form")
+public static class PointLight extends LXPattern {
+  private class PrimativeLight {
+    public LXVector mPosition = new LXVector(0, 0, 0);
+    public int      mColor    = 0;
+    public float    mFalloff  = 0;
+
+    PrimativeLight() {
+
+    }
+
+    PrimativeLight(LXVector iPosition, int iColor, float iFalloff) {
+      mPosition = new LXVector(iPosition);
+      mColor    = iColor;
+      mFalloff  = iFalloff;
+    }
+
+    public int getColor(LXPoint iPoint) {
+      if(mColor == 0 || mFalloff == 0) {
+        return 0;
+      }
+
+      float distance = Math.distance(iPoint, mPosition.point);
+      if(distance < mFalloff) {
+        return 0;
+      }
+
+      return LXColor.lerp(mColor, 0, distance / mFalloff);
+    }
+  }
+
+  public final CompoundParameter iPositionX = new CompoundParameter("X", GridModel3D.SIZE * GridModel3D.SPACING * 0.5f, GridModel3D.SIZE * GridModel3D.SPACING);
+  public final CompoundParameter iPositionY = new CompoundParameter("Y", GridModel3D.SIZE * GridModel3D.SPACING * 0.5f, GridModel3D.SIZE * GridModel3D.SPACING);
+  public final CompoundParameter iPositionZ = new CompoundParameter("Z", GridModel3D.SIZE * GridModel3D.SPACING * 0.5f, GridModel3D.SIZE * GridModel3D.SPACING);
+  public final ColorParameter    iColor     = new ColorParameter("Color", LXColor.rgb(200, 200, 200));
+  public final CompoundParameter iFalloff   = new CompoundParameter("Falloff", GridModel3D.SIZE * GridModel3D.SPACING * 0.25f, GridModel3D.SIZE * GridModel3D.SPACING);
+
+  private final PrimativeLight mLight = new PrimativeLight();
+
+  public PointLight(LX lx) {
+    super(lx);
+    addParameter("X",       this.iPositionX);
+    addParameter("Y",       this.iPositionY);
+    addParameter("Z",       this.iPositionZ);
+    addParameter("Color",   this.iColor);
+    addParameter("Falloff", this.iFalloff);
+  }
+
+  // Time is in milliseconds
+  public void run(double deltaTime) {
+    // Update
+    mLight.mPosition.x = iPositionX.getValuef();
+    mLight.mPosition.y = iPositionY.getValuef();
+    mLight.mPosition.z = iPositionZ.getValuef();
+    mLight.mColor      = iColor.getColor();
+    mLight.mFalloff    = iFalloff.getValuef();
+
+    // Render
+    for (LXPoint point : model.points) {
+      colors[point.index] = mLight.getColor(point);
+    }
+  }
+}
