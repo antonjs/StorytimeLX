@@ -19,12 +19,18 @@ public final static float POLE_WIDTH = 6 * IN;
 
 public static class Storytime extends LXModel {
   public final Lampshade lampshade;
+  public final Pole pole;
+  public final Book topBook;
+  public final Book bottomBook;
   
   public Storytime() {
     super(new Fixture());
     
     Fixture f = (Fixture)this.fixtures.get(0);
     lampshade = f.lampshade;
+    pole = f.pole;
+    topBook = f.topBook;
+    bottomBook = f.bottomBook;
   }
   
   public static class Fixture extends LXAbstractFixture {
