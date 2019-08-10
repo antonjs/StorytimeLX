@@ -1,12 +1,15 @@
 // Primatives
+import static processing.core.PApplet.*;
+import heronarts.lx.model.*;
+import heronarts.lx.transform.*;
+import heronarts.lx.color.*;
 
-public class PrimativeLight extends LXModel {
+class PrimativeLight {
   public LXVector mPosition = new LXVector(0, 0, 0);
   public int      mColor    = 0;
   public float    mFalloff  = 0;
 
   PrimativeLight() {
-
   }
 
   PrimativeLight(LXVector iPosition, int iColor, float iFalloff) {
@@ -20,8 +23,9 @@ public class PrimativeLight extends LXModel {
       return 0;
     }
 
-    float distance = Math.distance(iPoint, mPosition.point);
-    if(distance < mFalloff) {
+    println(mPosition.point);
+    float distance = Math.distance(iPoint, mPosition);
+    if(distance > mFalloff) {
       return 0;
     }
 

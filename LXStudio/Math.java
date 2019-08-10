@@ -1,8 +1,12 @@
 // Teach a computer to math, and you never have to math again
 
+import static processing.core.PApplet.*;
+import heronarts.lx.model.*;
+import heronarts.lx.transform.*;
+
 // Unrolled for SPEED
-public static class Math {
-  final static float EPSILON = 0.0001;
+final class Math {
+  final static float EPSILON = 0.0001f;
 
   public static float distance(float x1, float x2) {
     return abs(x1 - x2);
@@ -18,6 +22,10 @@ public static class Math {
 
   // magnitude
   public static float distance(LXPoint a, LXPoint b) {
+    return sqrt(sq(a.x - b.x) + sq(a.y - b.y) + sq(a.z - b.z));
+  }
+
+  public static float distance(LXPoint a, LXVector b) {
     return sqrt(sq(a.x - b.x) + sq(a.y - b.y) + sq(a.z - b.z));
   }
 
