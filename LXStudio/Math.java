@@ -8,6 +8,17 @@ import heronarts.lx.transform.*;
 final class Math {
   final static float EPSILON = 0.0001f;
 
+  // TODO Optimize with tree
+  public static float max(LXVector v) {
+    if(v.x > v.y && v.x > v.z) {
+      return v.x;
+    } else if(v.y > v.x && v.y > v.z) {
+      return v.y;
+    } else {
+      return v.z;
+    }
+  }
+
   public static float distance(float x1, float x2) {
     return abs(x1 - x2);
   }
@@ -27,6 +38,10 @@ final class Math {
 
   public static float distance(LXPoint a, LXVector b) {
     return sqrt(sq(a.x - b.x) + sq(a.y - b.y) + sq(a.z - b.z));
+  }
+
+  public static float sqDistance(LXPoint a, LXVector b) {
+    return sq(a.x - b.x) + sq(a.y - b.y) + sq(a.z - b.z);
   }
 
   public static LXVector vector(LXPoint a, LXPoint b) {

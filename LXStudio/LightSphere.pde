@@ -1,10 +1,5 @@
-// Particle (Point Light)
-// - Position
-// - Color
-// - Falloff
-
 @LXCategory("Form")
-public static class SphereLight extends LXPattern {
+public static class LightSphere extends LXPattern {
   public final CompoundParameter iPositionX = new CompoundParameter("X", GridModel3D.SIZE * GridModel3D.SPACING * 0.5f, GridModel3D.SIZE * GridModel3D.SPACING);
   public final CompoundParameter iPositionY = new CompoundParameter("Y", GridModel3D.SIZE * GridModel3D.SPACING * 0.5f, GridModel3D.SIZE * GridModel3D.SPACING);
   public final CompoundParameter iPositionZ = new CompoundParameter("Z", GridModel3D.SIZE * GridModel3D.SPACING * 0.5f, GridModel3D.SIZE * GridModel3D.SPACING);
@@ -14,7 +9,7 @@ public static class SphereLight extends LXPattern {
 
   private PrimitiveSphere mLight = new PrimitiveSphere();
 
-  public SphereLight(LX lx) {
+  public LightSphere(LX lx) {
     super(lx);
     addParameter("X",       this.iPositionX);
     addParameter("Y",       this.iPositionY);
