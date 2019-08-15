@@ -23,12 +23,16 @@
 
 // Reference to top-level LX instance
 heronarts.lx.studio.LXStudio lx;
+static PImage[] stainedGlass; 
 
 void setup() {
   // Processing setup, constructs the window and the LX instance
   size(800, 720, P3D);
   lx = new heronarts.lx.studio.LXStudio(this, buildModel(), MULTITHREADED);
   lx.ui.setResizable(RESIZABLE);
+  stainedGlass = new PImage[2];
+  stainedGlass[0] = loadImage(dataPath("").concat("/stained-glass-history.jpg")); 
+  stainedGlass[1] = loadImage(dataPath("").concat("/stained-glass-test.jpg")); 
 }
 
 void initialize(final heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStudio.UI ui) {

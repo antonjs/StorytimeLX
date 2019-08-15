@@ -70,7 +70,7 @@ public static class Lampshade extends LXModel {
   }
   
   public static class Fixture extends LXAbstractFixture {
-    private final ArrayList<LampStrip> lampStrips = new ArrayList<LampStrip>();
+    public final ArrayList<LampStrip> lampStrips = new ArrayList<LampStrip>();
 
     Fixture(LXTransform t) {
       t.push();
@@ -81,6 +81,7 @@ public static class Lampshade extends LXModel {
       t.rotateX(radians(38.1)); // Bottom front edge
       t.translate(0, 6 * IN, 0);
       
+      System.out.println("LampStrip");
       for (int i = 0; i < 5; i++) {
         addLampStrip(new LampStrip(t));
         t.translate(0, SHORT_SIDE_LENGTH + INTER_PANEL_SPACE, 0);
@@ -106,6 +107,7 @@ public static class Lampshade extends LXModel {
       t.pop();
       
       t.pop();
+      System.out.println("End LampStrip");
     }
     
     private void addLampStrip(LampStrip strip) {
@@ -129,8 +131,8 @@ public static class LampStrip extends LXModel {
       int shortSideLEDCount = round(LEDS_PER_METER * SHORT_SIDE_LENGTH / M);
       int longSideLEDCount = round(LEDS_PER_METER * LONG_SIDE_LENGTH / M);
       
-      System.out.println(LEDS_PER_METER);
-      System.out.println(LONG_SIDE_LENGTH);
+      // System.out.println(LEDS_PER_METER);
+      // System.out.println(LONG_SIDE_LENGTH);
       System.out.println(longSideLEDCount);
       System.out.println(shortSideLEDCount);
       
@@ -182,7 +184,7 @@ public static class Pole extends LXModel {
   }
   
   public static class Fixture extends LXAbstractFixture {
-    private final ArrayList<ArrayList<LXPoint>> strips = new ArrayList<ArrayList<LXPoint>>();
+    public final ArrayList<ArrayList<LXPoint>> strips = new ArrayList<ArrayList<LXPoint>>();
 
     Fixture(LXTransform t) {
       // Oriented from top center of pole
