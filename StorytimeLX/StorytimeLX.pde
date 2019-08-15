@@ -31,8 +31,76 @@ void setup() {
   lx.ui.setResizable(RESIZABLE);
 }
 
+int[] getIndices(List<LXPoint> points) {
+  int[] indices = new int[points.size()];
+  for (int i = 0; i < points.size(); i++) {
+    indices[i] = points.get(i).index;
+  }
+  
+  return indices;
+}
+
+boolean addDatagram(LXDatagramOutput output, String ip, int universe, int[] indices) {
+  try {
+    ArtNetDatagram dg = new ArtNetDatagram(indices, universe);
+    dg.setAddress(ip);
+    dg.setByteOrder(LXDatagram.ByteOrder.RGB);  
+    output.addDatagram(dg);
+  } catch (Exception e) {
+    return false;
+  }
+  
+  return true;
+}
+
+boolean addDatagram(LXDatagramOutput output, String ip, int universe, List<LXPoint> points) {
+  return addDatagram(output, ip, universe, getIndices(points));
+}
+
 void initialize(final heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStudio.UI ui) {
-  // Add custom components or output drivers here
+  final double MAX_BRIGHTNESS = 1.0;
+  final String ARTNET_IP = "192.168.0.109";
+  
+  Storytime story = (Storytime)lx.model;
+
+  try {
+    int i = 0;
+    // Construct a new DatagramOutput object
+    LXDatagramOutput output = new LXDatagramOutput(lx);
+      
+    for (LampStrip strip : story.lampshade.lampStrips) {
+      i++;
+  
+      // Add an ArtNetDatagram which sends all of the points in the strip
+      println("Adding strip");
+      println("Universe", i);
+      println(getIndices(strip.getPoints()));
+      println();
+      
+      addDatagram(output, ARTNET_IP, i, strip.getPoints());
+    }
+    
+    // Add pole strips. The astute reader will notice we're using the iterator from
+    // above---we assume that the pole strips will be just the next main controller
+    // outputs after the lampshade.
+    for (List<LXPoint> strip : story.pole.strips) {
+      i++;
+      
+      addDatagram(output, ARTNET_IP, i, strip);
+    }
+    
+    // Add books. These guys are on a remote controller; universes tbd but hopefully
+    // sequential. That's what we'll do for now.
+    addDatagram(output, ARTNET_IP, ++i, story.topBook.getPoints());
+    addDatagram(output, ARTNET_IP, ++i, story.bottomBook.getPoints());
+    
+    output.brightness.setNormalized(MAX_BRIGHTNESS);
+    
+    // Add the datagram output to the LX engine
+    //lx.addOutput(output);
+  } catch (Exception x) {
+    x.printStackTrace();
+  }
 }
 
 void onUIReady(heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStudio.UI ui) {

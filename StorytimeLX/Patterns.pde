@@ -41,6 +41,73 @@ public static class PlanePattern extends LXPattern {
   }
 }
 
+@LXCategory("Glass")
+public class GlassMap extends LXPattern {
+  public final DiscreteParameter strip;
+  
+  public PImage glassImage;
+  
+  public GlassMap(LX lx) {
+    super(lx);
+    
+    Storytime story = (Storytime)lx.model;
+    strip = new DiscreteParameter("Strip", 0, story.lampshade.lampStrips.size())
+              .setDescription("Position of the center of the plane");
+              
+    addParameter("strip", this.strip);
+    
+    glassImage = loadImage("/Users/anton/Projects/Storytime/Code/StorytimeLX/assets/Template.png");
+    glassImage.resize(LONG_SIDE_LED_COUNT, 2 * story.lampshade.lampStrips.size());
+  }
+  
+  public void run(double deltaMs) {
+    Lampshade lampshade = ((Storytime)model).lampshade;
+    
+    //clearColors();
+    for (int i = 0; i < lampshade.lampStrips.size(); i++) {
+      LampStrip ls = lampshade.lampStrips.get(i);
+      
+      List<LXPoint> points = ls.getPoints();
+      for (int j = 0; j < LONG_SIDE_LED_COUNT; j++) {
+        colors[points.get(j).index] = glassImage.get(j,i*2);
+      }
+    }
+  }
+}
+
+@LXCategory("Test")
+public static class LampStripIterator extends LXPattern {
+  public final DiscreteParameter strip;
+  
+  public LampStripIterator(LX lx) {
+    super(lx);
+    
+    Storytime story = (Storytime)lx.model;
+    strip = new DiscreteParameter("Strip", 0, story.lampshade.lampStrips.size())
+              .setDescription("Position of the center of the plane");
+              
+    //LXParameterListener updateGamma = new LXParameterListener() {
+    //  @Override
+    //  public void onParameterChanged(LXParameter param) {
+    //    updateLUT(param.getValuef());
+    //  }
+    //};
+    
+    //this.gamma.addListener(updateGamma);
+              
+    addParameter("strip", this.strip);
+  }
+  
+  public void run(double deltaMs) {
+    LampStrip s = ((Storytime)model).lampshade.lampStrips.get(strip.getValuei());
+    
+    clearColors();
+    for (LXPoint p : s.getPoints()) {
+      colors[p.index] = LXColor.gray(100);
+    }
+  }
+}
+
 // Effects
 
 // Lampshade mask effect
@@ -67,7 +134,7 @@ public static class MaskEffect extends LXEffect {
     
     if (part.getEnum() != CarParts.BOOKS) {
       for (int i = 0; i < model.topBook.points.length; i++) colors[model.topBook.points[i].index] = 0;
-      for (int i = 0; i < model.topBook.points.length; i++) colors[model.topBook.points[i].index] = 0;
+      for (int i = 0; i < model.bottomBook.points.length; i++) colors[model.bottomBook.points[i].index] = 0;
     }
   }
 }

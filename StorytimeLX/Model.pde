@@ -8,8 +8,12 @@ LXModel buildModel() {
 
 public final static float LEDS_PER_METER = 60;
 public final static float LED_SPACING = 1 * M / LEDS_PER_METER;
+
 public final static float SHORT_SIDE_LENGTH = 6 * IN;
 public final static float LONG_SIDE_LENGTH = (5 * M - 12 * IN) / 2;
+public final static int SHORT_SIDE_LED_COUNT = round(LEDS_PER_METER * SHORT_SIDE_LENGTH / M);
+public final static int LONG_SIDE_LED_COUNT = round(LEDS_PER_METER * LONG_SIDE_LENGTH / M);
+
 public final static float INTER_PANEL_SPACE = 0 * CM;
 public final static float LED_INSET = 1.5 * IN;
 
@@ -31,6 +35,15 @@ public static class Storytime extends LXModel {
     pole = f.pole;
     topBook = f.topBook;
     bottomBook = f.bottomBook;
+  }
+  
+  public List<LXPoint> bothBooks() {
+    // Convenience method to return points across both books
+    ArrayList<LXPoint> bookPoints = new ArrayList<LXPoint>();
+    bookPoints.addAll(topBook.getPoints());
+    bookPoints.addAll(bottomBook.getPoints());
+    
+    return Collections.unmodifiableList(bookPoints);
   }
   
   public static class Fixture extends LXAbstractFixture {
@@ -69,8 +82,12 @@ public static class Storytime extends LXModel {
 }
 
 public static class Lampshade extends LXModel {
+  public final List<LampStrip> lampStrips;
+  
   public Lampshade(LXTransform t){
     super(new Fixture(t));
+    
+    lampStrips = Collections.unmodifiableList(((Fixture)this.fixtures.get(0)).lampStrips);
   }
   
   public Lampshade() {
@@ -124,8 +141,19 @@ public static class Lampshade extends LXModel {
 }
 
 public static class LampStrip extends LXModel {
+  public final List<LXPoint> top;
+  public final List<LXPoint> bottom;
+  public final List<LXPoint> left;
+  public final List<LXPoint> right;
+  
   public LampStrip(LXTransform t){
     super(new Fixture(t));
+    
+    Fixture f = (Fixture)this.fixtures.get(0);
+    top = Collections.unmodifiableList(f.top);
+    bottom = Collections.unmodifiableList(f.bottom);
+    left = Collections.unmodifiableList(f.left);
+    right = Collections.unmodifiableList(f.right);
   }
   
   public LampStrip() {
@@ -133,46 +161,42 @@ public static class LampStrip extends LXModel {
   }
   
   public static class Fixture extends LXAbstractFixture {
+    private final ArrayList<LXPoint> top = new ArrayList<LXPoint>();;
+    private final ArrayList<LXPoint> bottom = new ArrayList<LXPoint>();
+    private final ArrayList<LXPoint> left = new ArrayList<LXPoint>();
+    private final ArrayList<LXPoint> right = new ArrayList<LXPoint>();
+    
+    void addPoint(ArrayList<LXPoint> side, LXPoint point) {
+      addPoint(point);
+      side.add(point);
+    }
+    
     Fixture(LXTransform t) {
       int shortSideLEDCount = round(LEDS_PER_METER * SHORT_SIDE_LENGTH / M);
       int longSideLEDCount = round(LEDS_PER_METER * LONG_SIDE_LENGTH / M);
       
-      System.out.println(LEDS_PER_METER);
-      System.out.println(LONG_SIDE_LENGTH);
-      System.out.println(longSideLEDCount);
-      System.out.println(shortSideLEDCount);
-      
       t.push();
-      //addPoint(new LXPoint(t));
       
-      //t.translate(LONG_SIDE_LENGTH,0,0);
-      //addPoint(new LXPoint(t));
-      
-      //t.translate(0,-1 * SHORT_SIDE_LENGTH,0);
-      //addPoint(new LXPoint(t));
-      
-      //t.translate(-1 * LONG_SIDE_LENGTH,0,0);
-      //addPoint(new LXPoint(t));
       t.translate(LED_INSET, -1 * LED_INSET, 0);
       
       for (int i = 0; i < longSideLEDCount; i++) {
          t.translate((LONG_SIDE_LENGTH - 2 * LED_INSET) / longSideLEDCount, 0, 0);
-         addPoint(new LXPoint(t));
+         addPoint(top, new LXPoint(t));
       }
       
       for (int i = 0; i < shortSideLEDCount; i++) {
         t.translate(0, -1 * (SHORT_SIDE_LENGTH - 2 * LED_INSET) / shortSideLEDCount, 0);
-        addPoint(new LXPoint(t));
+        addPoint(right, new LXPoint(t));
       }
       
       for (int i = 0; i < longSideLEDCount; i++) {
         t.translate(-1 * (LONG_SIDE_LENGTH - 2 * LED_INSET) / longSideLEDCount, 0, 0);
-        addPoint(new LXPoint(t));
+        addPoint(bottom, new LXPoint(t));
       }
       
       for (int i = 0; i < shortSideLEDCount; i++) {
         t.translate(0, 1 * (SHORT_SIDE_LENGTH - 2 * LED_INSET) / shortSideLEDCount, 0);
-        addPoint(new LXPoint(t));
+        addPoint(left, new LXPoint(t));
       }
       
       t.pop();
@@ -181,8 +205,12 @@ public static class LampStrip extends LXModel {
 }
 
 public static class Pole extends LXModel {
+  public final List<ArrayList<LXPoint>> strips;
+
   public Pole(LXTransform t){
     super(new Fixture(t));
+    
+    strips = Collections.unmodifiableList(((Fixture)this.fixtures.get(0)).strips);
   }
   
   public Pole() {
@@ -226,8 +254,12 @@ public static class Pole extends LXModel {
 }
 
 public static class Book extends LXModel {
+  public final List<ArrayList<LXPoint>> strips;
+  
   public Book(LXTransform t, float w, float l, float h){
     super(new Fixture(t, w, l, h));
+    
+    strips = Collections.unmodifiableList(((Fixture)this.fixtures.get(0)).strips);
   }
   
   public Book() {

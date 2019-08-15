@@ -1,6 +1,6 @@
 {
   "version": "0.1",
-  "timestamp": 1565425162136,
+  "timestamp": 1565848903477,
   "engine": {
     "id": 1,
     "class": "heronarts.lx.LXEngine",
@@ -15,7 +15,7 @@
       "crossfader": 0.5,
       "crossfaderBlendMode": 0,
       "speed": 1.0,
-      "focusedChannel": 2,
+      "focusedChannel": 0,
       "cueA": false,
       "cueB": false,
       "multithreaded": true,
@@ -29,11 +29,11 @@
       "modulationColor": -9765120,
       "parameters": {
         "label": "",
-        "hueMode": 0,
+        "hueMode": 2,
         "color/brightness": 100.0,
         "color/saturation": 100.0,
         "color/hue": 0.0,
-        "period": 120000.0,
+        "period": 12000.0,
         "range": 10.0
       }
     },
@@ -45,7 +45,7 @@
         "parameters": {
           "label": "Lamp",
           "arm": false,
-          "selected": false,
+          "selected": true,
           "enabled": true,
           "cue": false,
           "fader": 1.0,
@@ -96,7 +96,7 @@
             "autoCycleEnabled": false
           },
           {
-            "id": 38,
+            "id": 129,
             "class": "heronarts.p3lx.pattern.SolidPattern",
             "modulationColor": -2294016,
             "parameters": {
@@ -113,7 +113,7 @@
             "autoCycleEnabled": true
           },
           {
-            "id": 40,
+            "id": 131,
             "class": "heronarts.lx.pattern.GradientPattern",
             "modulationColor": -65373,
             "parameters": {
@@ -127,6 +127,21 @@
               "offsetY": 0.0,
               "offsetZ": 0.0,
               "mirror": true
+            },
+            "modulation": {
+              "modulators": [],
+              "modulations": [],
+              "triggers": []
+            },
+            "autoCycleEnabled": true
+          },
+          {
+            "id": 184,
+            "class": "StorytimeLX$LampStripIterator",
+            "modulationColor": -16711908,
+            "parameters": {
+              "label": "LampStripIterator",
+              "strip": 0
             },
             "modulation": {
               "modulators": [],
@@ -220,7 +235,7 @@
         "parameters": {
           "label": "Books",
           "arm": false,
-          "selected": true,
+          "selected": false,
           "enabled": true,
           "cue": false,
           "fader": 1.0,
@@ -413,7 +428,7 @@
         "mode": 0,
         "fps": 0.0,
         "gamma": 0,
-        "brightness": 1.0
+        "brightness": 0.2285714205354452
       }
     },
     "components": {},
