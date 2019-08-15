@@ -56,8 +56,8 @@ public class GlassMap extends LXPattern {
               
     addParameter("strip", this.strip);
     
-    glassImage = loadImage("/Users/anton/Projects/Storytime/Code/StorytimeLX/assets/Template.png");
-    glassImage.resize(LONG_SIDE_LED_COUNT, 2 * story.lampshade.lampStrips.size());
+    glassImage = loadImage("/Users/anton/Projects/Storytime/Code/StorytimeLX/assets/Test.png");
+    glassImage.resize(LONG_SIDE_LED_COUNT + 1, 2 * story.lampshade.lampStrips.size());
   }
   
   public void run(double deltaMs) {
@@ -67,9 +67,9 @@ public class GlassMap extends LXPattern {
     for (int i = 0; i < lampshade.lampStrips.size(); i++) {
       LampStrip ls = lampshade.lampStrips.get(i);
       
-      List<LXPoint> points = ls.getPoints();
-      for (int j = 0; j < LONG_SIDE_LED_COUNT; j++) {
-        colors[points.get(j).index] = glassImage.get(j,i*2);
+      for (int j = 0; j < LONG_SIDE_LED_COUNT + 1; j++) {
+        colors[j == 0 ? ls.left.get(ls.left.size()-1).index : ls.top.get(j-1).index] = glassImage.get(j,i*2);
+        colors[j == 0 ? ls.right.get(ls.right.size()-1).index : ls.bottom.get(j-1).index] = glassImage.get(LONG_SIDE_LED_COUNT + 1 - j, i*2+1); // Bottom is indexed right-to-left
       }
     }
   }

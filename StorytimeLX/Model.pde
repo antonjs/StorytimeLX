@@ -100,33 +100,36 @@ public static class Lampshade extends LXModel {
     Fixture(LXTransform t) {
       t.push();
       
-      // Bottom panel is at 0 x -9 x +35 from circle origin
+      // Run out the back panels
       t.push();
-      t.translate(0, -9 * IN, -35 * IN);
-      t.rotateX(radians(38.1)); // Bottom front edge
-      t.translate(0, 6 * IN, 0);
-      
-      for (int i = 0; i < 5; i++) {
+      t.translate(0, -1 * SHORT_SIDE_LENGTH, 22 * IN);
+      for (int i = 0; i < 2; i++) {
         addLampStrip(new LampStrip(t));
-        t.translate(0, SHORT_SIDE_LENGTH + INTER_PANEL_SPACE, 0);
+        t.translate(0, 1 * SHORT_SIDE_LENGTH, 0);
       }
       t.pop();
       
       // Now we align the next panels based on an arc centered on the origin with radius 22"      
       for (int i = 0; i < 10; i++) {
         t.push();
-        t.rotateX(radians(55 + 14.233*i)); // was: 14*i
+        t.rotateX(radians(180 - 14.233*i));
         t.translate(0,0,-22 * IN);
         addLampStrip(new LampStrip(t));
         t.pop();
       }
       
-      // Finally we run out the last vertical panels
+      // Bottom panel is at 0 x -9 x +35 from circle origin
       t.push();
-      t.translate(0, 0, 22 * IN);
-      for (int i = 0; i < 2; i++) {
+      t.rotateX(radians(180 - 14.233 * 10));
+      t.translate(0,0,-22 * IN);
+      
+      //t.translate(0, -9 * IN, -35 * IN);
+      //t.rotateX(radians(38.1)); // Bottom front edge
+      //t.translate(0, 6 * IN, 0);
+      
+      for (int i = 0; i < 5; i++) {
         addLampStrip(new LampStrip(t));
-        t.translate(0, -1 * SHORT_SIDE_LENGTH, 0);
+        t.translate(0, -1 * (SHORT_SIDE_LENGTH + INTER_PANEL_SPACE), 0);
       }
       t.pop();
       
