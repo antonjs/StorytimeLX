@@ -43,12 +43,159 @@ public static class PlanePattern extends LXPattern {
   }
 }
 
-@LXCategory("Form")
+@LXCategory("Glass")
+public class GlassMap extends LXPattern {
+  public final DiscreteParameter strip;
+  
+  public PImage glassImage;
+  
+  public GlassMap(LX lx) {
+    super(lx);
+    
+    Storytime story = (Storytime)lx.model;
+    strip = new DiscreteParameter("Strip", 0, story.lampshade.lampStrips.size())
+              .setDescription("Position of the center of the plane");
+              
+    addParameter("strip", this.strip);
+    
+    glassImage = loadImage("/Users/anton/Projects/Storytime/Code/StorytimeLX/assets/Test.png");
+    glassImage.resize(LONG_SIDE_LED_COUNT + 1, 2 * story.lampshade.lampStrips.size());
+  }
+  
+  public void run(double deltaMs) {
+    Lampshade lampshade = ((Storytime)model).lampshade;
+    
+    //clearColors();
+    for (int i = 0; i < lampshade.lampStrips.size(); i++) {
+      LampStrip ls = lampshade.lampStrips.get(i);
+      
+      for (int j = 0; j < LONG_SIDE_LED_COUNT + 1; j++) {
+        colors[j == 0 ? ls.left.get(ls.left.size()-1).index : ls.top.get(j-1).index] = glassImage.get(j,i*2);
+        colors[j == 0 ? ls.right.get(ls.right.size()-1).index : ls.bottom.get(j-1).index] = glassImage.get(LONG_SIDE_LED_COUNT + 1 - j, i*2+1); // Bottom is indexed right-to-left
+      }
+    }
+  }
+}
+
+@LXCategory("Test")
+public static class LampStripIterator extends LXPattern {
+  public final DiscreteParameter strip;
+  
+  public LampStripIterator(LX lx) {
+    super(lx);
+    
+    Storytime story = (Storytime)lx.model;
+    strip = new DiscreteParameter("Strip", 0, story.lampshade.lampStrips.size())
+              .setDescription("Position of the center of the plane");
+              
+    //LXParameterListener updateGamma = new LXParameterListener() {
+    //  @Override
+    //  public void onParameterChanged(LXParameter param) {
+    //    updateLUT(param.getValuef());
+    //  }
+    //};
+    
+    //this.gamma.addListener(updateGamma);
+              
+    addParameter("strip", this.strip);
+  }
+  
+  public void run(double deltaMs) {
+    LampStrip s = ((Storytime)model).lampshade.lampStrips.get(strip.getValuei());
+    
+    clearColors();
+    for (LXPoint p : s.getPoints()) {
+      colors[p.index] = LXColor.gray(100);
+    }
+  }
+}
+
+// Effects
+
+// Lampshade mask effect
+public static class MaskEffect extends LXEffect {
+  public enum CarParts { LAMP, POLE, BOOKS };
+  public final EnumParameter<CarParts> part = new EnumParameter("Part", CarParts.LAMP);
+  
+  public MaskEffect(LX lx) {
+    super(lx);
+    addParameter(part);
+  }
+  
+  public void run(double deltaMs, double amount) {
+    Storytime model = ((Storytime)lx.model);
+    
+    
+    if (part.getEnum() != CarParts.LAMP) {
+      for (int i = 0; i < model.lampshade.points.length; i++) colors[model.lampshade.points[i].index] = 0;
+    }
+    
+    if (part.getEnum() != CarParts.POLE) {
+      for (int i = 0; i < model.pole.points.length; i++) colors[model.pole.points[i].index] = 0;
+    }
+    
+    if (part.getEnum() != CarParts.BOOKS) {
+      for (int i = 0; i < model.topBook.points.length; i++) colors[model.topBook.points[i].index] = 0;
+      for (int i = 0; i < model.bottomBook.points.length; i++) colors[model.bottomBook.points[i].index] = 0;
+    }
+  }
+}
+
+// Gamma correction effect
+// Shamelessly boosted and modified from the Tree of Tenere LXStudio output code
+public static class GammaEffect extends LXEffect {
+  public final CompoundParameter gamma = new CompoundParameter("Gamma", 1.8, 1, 4)
+    .setDescription("Gamma");
+
+  static final byte[][] GAMMA_LUT = new byte[256][256];
+  private final LXParameter brightness; 
+
+  public GammaEffect(LX lx) {
+    super(lx);
+    this.brightness = lx.engine.output.brightness;
+    
+    LXParameterListener updateGamma = new LXParameterListener() {
+      @Override
+      public void onParameterChanged(LXParameter param) {
+        updateLUT(param.getValuef());
+      }
+    };
+    
+    this.gamma.addListener(updateGamma);
+    updateLUT(gamma.getValuef());
+    addParameter(gamma);
+  }
+  
+  protected void updateLUT(float val) {
+    for (int b = 0; b < 256; ++b) {
+      for (int in = 0; in < 256; ++in) {
+        GAMMA_LUT[b][in] = (byte) (0xff & (int) Math.round(Math.pow(in * b / 65025.f, val) * 255.f));
+      }
+    }
+  }
+  
+  public void run(double deltaMs, double amount) {
+    final byte[] gamma = GAMMA_LUT[Math.round(255 * this.brightness.getValuef())];
+    
+    for (int i = 0; i < colors.length; i++) {
+      final int c = colors[i];
+      
+      colors[i] = LXColor.rgb(
+        gamma[0xff & (c >> 16)],
+        gamma[0xff & (c >> 8)],
+        gamma[0xff & c]
+      );
+    }    
+  }
+
+}
+
+@LXCategory("Glass")
 public static class VoronoiStainedGlass extends LXPattern {
   LXPoint[][] ledGrid;
   int[] colorPalette;
   boolean running;
-  int[][] centers;
+  double[][] centers;
   double[][] directions;
   double timeToUpdate;
   int N;
@@ -74,20 +221,23 @@ public static class VoronoiStainedGlass extends LXPattern {
   private void setupLEDGrid() {
     Storytime storytime = (Storytime)model;
     Lampshade lampshade = storytime.lampshade;
-    Lampshade.Fixture f = (Lampshade.Fixture)lampshade.fixtures.get(0);
-    ledGrid = new LXPoint[f.lampStrips.size()*2][140];
-    for (int i = 0; i < f.lampStrips.size(); i++) { 
-      LampStrip s = f.lampStrips.get(i);
+    int numLampStrips = lampshade.lampStrips.size();
+    ledGrid = new LXPoint[numLampStrips*2][LONG_SIDE_LED_COUNT-1];
+    for (int i = 0; i < numLampStrips; i++) { 
+      LampStrip s = lampshade.lampStrips.get(i);
       int k1 = 0;
       int k2 = 0;
       for(int j = 0; j < s.points.length; j++) {
-        if (j < 140) {
+        if (j < LONG_SIDE_LED_COUNT-1) {
+          // ledGrid[2*numLampStrips - (2*i+1) - 1][LONG_SIDE_LED_COUNT-2-k1] = s.points[j];
           ledGrid[2*i][k1] = s.points[j];
           k1++;
-        } else if (j >= 150 && j < 290) {
-          ledGrid[2*i+1][139-k2] = s.points[j];
+        } else if (j >= LONG_SIDE_LED_COUNT + SHORT_SIDE_LED_COUNT && j < SHORT_SIDE_LED_COUNT + (LONG_SIDE_LED_COUNT)*2-1) {
+          // ledGrid[2*numLampStrips - (2*i) - 1][k2] = s.points[j];
+          ledGrid[(2*i+1)][LONG_SIDE_LED_COUNT-k2-2] = s.points[j];
           k2++;
         }
+        
       }
     }
   }
@@ -96,7 +246,7 @@ public static class VoronoiStainedGlass extends LXPattern {
      colorPalette = new int[10];
      if(this.paletteNum.getValuei() == 1) {
        for(int i = 0; i < 10; i++) {
-          colorPalette[i] = LXColor.gray(10*i); 
+          colorPalette[i] = LXColor.gray(10+(float)100/9*i); 
        }
      } else if (this.paletteNum.getValuei() == 2) {
        colorPalette[0] = LXColor.rgb(226,246,250);
@@ -121,7 +271,6 @@ public static class VoronoiStainedGlass extends LXPattern {
      for(int i = 0; i < 10; i++) {
         colorPalette[i] = tempColorPalette[inds.get(i)];
      }
-     // System.out.println(colorPalette[0]);
   }
   public VoronoiStainedGlass(LX lx) {
     super(lx);
@@ -155,18 +304,19 @@ public static class VoronoiStainedGlass extends LXPattern {
     // Pick random centers
     N = this.numCentroids.getValuei();
     System.out.printf("Generating %d new centers\n",N);
-    centers = new int[N][2];
+    centers = new double[N][2];
     directions = new double[N][2];
     for(int n = 0; n < N; n++) {
        centers[n][0] = ThreadLocalRandom.current().nextInt(0, ledGrid[0].length); // first coordinate = x
        centers[n][1] = ThreadLocalRandom.current().nextInt(0, ledGrid.length); // second coordinate = y
        
-       directions[n][0] = ThreadLocalRandom.current().nextDouble(-1, 1); // first coordinate = x
-       directions[n][1] = ThreadLocalRandom.current().nextDouble(-0.5, 0.5); // second coordinate = y
+       directions[n][0] = ThreadLocalRandom.current().nextDouble(-0.1, 0.1); // first coordinate = x
+       directions[n][1] = ThreadLocalRandom.current().nextDouble(-0.1, 0.1); // second coordinate = y
        
        // System.out.printf("%d, %d\n", centers[n][0], centers[n][1]);
     }
     // Reshuffle colors
+    setColorPalette();
     shuffleColors();
     // Assign groups
     for(int i = 0; i < ledGrid.length; i++) {
@@ -182,8 +332,8 @@ public static class VoronoiStainedGlass extends LXPattern {
   private void updatePattern() {
     // Move centers
     for(int n = 0; n < N; n++) {
-       centers[n][0] = (int)Math.round(centers[n][0] + directions[n][0]);
-       centers[n][1] = (int)Math.round(centers[n][1] + directions[n][1]);
+       centers[n][0] = centers[n][0] + directions[n][0];
+       centers[n][1] = centers[n][1] + directions[n][1];
        if(this.mode.getEnum() == Mode.Reflecting) {
          if (centers[n][0] >= ledGrid[0].length-1) {
            directions[n][0] = -directions[n][0];
@@ -253,11 +403,11 @@ public static class VoronoiStainedGlass extends LXPattern {
   }
 }
 
-@LXCategory("Form")
+@LXCategory("Glass")
 public static class PremadeStainedGlassPattern extends LXPattern {
   LXPoint[][] ledGrid;
   int lastImageNum;
-  
+  int numLampStrips;
   public final DiscreteParameter imageNum = new DiscreteParameter("imageNum", 0, 2)
      .setDescription("Image number");
      
@@ -266,37 +416,35 @@ public static class PremadeStainedGlassPattern extends LXPattern {
     // Setup LED grid
     Storytime storytime = (Storytime)model;
     Lampshade lampshade = storytime.lampshade;
-    Lampshade.Fixture f = (Lampshade.Fixture)lampshade.fixtures.get(0);
-    ledGrid = new LXPoint[f.lampStrips.size()*2][140];
-    
-    
-    for (int i = 0; i < f.lampStrips.size(); i++) { 
-      LampStrip s = f.lampStrips.get(i);
+    numLampStrips = lampshade.lampStrips.size();
+    ledGrid = new LXPoint[numLampStrips*2][LONG_SIDE_LED_COUNT-1];
+    for (int i = 0; i < numLampStrips; i++) { 
+      LampStrip s = lampshade.lampStrips.get(i);
       int k1 = 0;
       int k2 = 0;
       for(int j = 0; j < s.points.length; j++) {
-        if (j < 140) {
-          ledGrid[2*i+1][k1] = s.points[j];
-          
+        if (j < LONG_SIDE_LED_COUNT-1) {
+          ledGrid[2*i][k1] = s.points[j];
           k1++;
-        } else if (j >= 150 && j < 290) {
-          ledGrid[2*i][139-k2] = s.points[j];
-          
+        } else if (j >= LONG_SIDE_LED_COUNT + SHORT_SIDE_LED_COUNT && j < SHORT_SIDE_LED_COUNT + (LONG_SIDE_LED_COUNT)*2-1) {
+          ledGrid[(2*i+1)][LONG_SIDE_LED_COUNT-k2-2] = s.points[j];
           k2++;
         }
         
       }
     }
+    
     lastImageNum = 0;
     setImage(lastImageNum);
     addParameter("imageNum", this.imageNum);
   }
   
   public void setImage(int num) {
-    int rowSkip = (int)Math.floor((float)stainedGlass[num].height/(17*2));
+    int rowSkip = (int)Math.floor((float)stainedGlass[num].height/(2*numLampStrips));
+    System.out.printf("rowSkip: %d\n", rowSkip);
     for (int i = 0; i < ledGrid.length; i++) { 
       for(int j = 0; j < ledGrid[i].length; j++) {
-        colors[ledGrid[i][j].index] = stainedGlass[num].get(j, (33 - i)*rowSkip); // LXColor.gray(0);
+        colors[ledGrid[i][j].index] = stainedGlass[num].get(j, i*rowSkip); // (2*numLampStrips - i)*rowSkip); // LXColor.gray(0);
       }
     }
   }
@@ -308,7 +456,7 @@ public static class PremadeStainedGlassPattern extends LXPattern {
   }
 }
 
-@LXCategory("Form")
+@LXCategory("Effects")
 public static class ZigZagPattern extends LXPattern {
   LXPoint[][] ledGrid;
   int lampGreen = LXColor.rgb(142, 211, 129);
@@ -329,31 +477,33 @@ public static class ZigZagPattern extends LXPattern {
   public final CompoundParameter pos1 = new CompoundParameter("Pos1", 0, 1).setDescription("Position of bar in top row");
   public final CompoundParameter pos2 = new CompoundParameter("Pos2", 0, 1).setDescription("Position of bar in bottom row");
 
+  private void setupLEDGrid() {
+      Storytime storytime = (Storytime)model;
+      Lampshade lampshade = storytime.lampshade;
+      int numLampStrips = lampshade.lampStrips.size();
+      ledGrid = new LXPoint[numLampStrips*2][LONG_SIDE_LED_COUNT-1];
+      for (int i = 0; i < numLampStrips; i++) { 
+        LampStrip s = lampshade.lampStrips.get(i);
+        int k1 = 0;
+        int k2 = 0;
+        for(int j = 0; j < s.points.length; j++) {
+          if (j < LONG_SIDE_LED_COUNT-1) {
+            // ledGrid[2*numLampStrips - (2*i+1) - 1][LONG_SIDE_LED_COUNT-2-k1] = s.points[j];
+            ledGrid[2*i][k1] = s.points[j];
+            k1++;
+          } else if (j >= LONG_SIDE_LED_COUNT + SHORT_SIDE_LED_COUNT && j < SHORT_SIDE_LED_COUNT + (LONG_SIDE_LED_COUNT)*2-1) {
+            // ledGrid[2*numLampStrips - (2*i) - 1][k2] = s.points[j];
+            ledGrid[(2*i+1)][k2] = s.points[j];
+            k2++;
+          }
+          
+        }
+     }
+  }
   public ZigZagPattern(LX lx) {
     super(lx);
     // Load lamp grid
-    Storytime storytime = (Storytime)model;
-    Lampshade lampshade = storytime.lampshade;
-    Lampshade.Fixture f = (Lampshade.Fixture)lampshade.fixtures.get(0);
-    ledGrid = new LXPoint[f.lampStrips.size()*2][140];
-    lastUpdatedInd_mode2 = new int[ledGrid.length*2];
-    for (int i = 0; i < f.lampStrips.size(); i++) { 
-      LampStrip s = f.lampStrips.get(i);
-      int k1 = 0;
-      int k2 = 0;
-      lastUpdatedInd_mode2[2*i] = i*8;
-      lastUpdatedInd_mode2[2*i+1] = i*8;
-      for(int j = 0; j < s.points.length; j++) {
-        if (j < 140) {
-          ledGrid[2*i][k1] = s.points[j];
-          k1++;
-        } else if (j >= 150 && j < 290) {
-          ledGrid[2*i+1][k2] = s.points[j];
-          k2++;
-        }
-        colors[s.points[j].index] = LXColor.gray(0);
-      }
-    }
+    setupLEDGrid();
     timeToUpdate = 0;
     lastUpdatedInd1 = lastUpdatedInd2 = -1;
     direction = 1;
@@ -397,155 +547,12 @@ public static class ZigZagPattern extends LXPattern {
     }
   }
   
-  void mode2() {
-    int nextInd;
-    for(int i = 0; i < ledGrid.length; i++) {
-      nextInd = (lastUpdatedInd_mode2[i]+1) % ledGrid[i].length;
-      if(colors[ledGrid[i][nextInd].index] == LXColor.gray(0))
-        colors[ledGrid[i][nextInd].index] = lampGreen;
-      else
-        colors[ledGrid[i][nextInd].index] = LXColor.gray(0);
-      lastUpdatedInd_mode2[i] = nextInd;
-    }
-  }
-  
   public void run(double deltaMs) {
-    //timeToUpdate += deltaMs;
-    //if (timeToUpdate >= 1000/this.speed.getValuef()) {
-    //  timeToUpdate = 0;
-    //} else {
-    //  return;
-    //}
-    
     if (this.mode.getValuei() != lastMode) {
       lastMode = this.mode.getValuei();
       reset();
     }
-    switch(this.mode.getValuei()) {
-      case 1:
-        mode1(this.pos1.getValuef(), this.pos2.getValuef());
-        break;
-      case 2:
-        mode2();
-        break;
-    }
+    mode1(this.pos1.getValuef(), this.pos2.getValuef());
   }
   
-}
-
-
-@LXCategory("Form")
-public static class TestPattern extends LXPattern {
-  
-  public double timeRun;
-  public double[] lastColors;
-  public int lastPos;
-  public double d = 0.5; 
-  public double attenuate = 0.1; 
-  
-  //public enum Axis {
-  //  X, Y, Z
-  //};
-  public enum Mode {
-      on, off
-  };
-  
-  public final EnumParameter<Mode> mode =
-    new EnumParameter<Mode>("Mode", Mode.off)
-    .setDescription("Whether animation is running or not.");
-    
-  public final BooleanParameter pulse = new BooleanParameter("Pulse", false)
-    .setDescription("Trigger an impulse");
-  
-  public final DiscreteParameter pos = new DiscreteParameter("Pos", 1, 17)
-    .setDescription("Position of the center of the plane");
-  // public final CompoundParameter pos = new CompoundParameter("Pos", 0, 1)
-  //    .setDescription("Light-bar index for pattern");
-  
-  public final CompoundParameter wth = new CompoundParameter("Width", .4, 0, 1)
-    .setDescription("Thickness of the plane");
-    
-  public final CompoundParameter speed = new CompoundParameter("Speed", 0, 1)
-    .setDescription("Speed to update pattern");
-    
-  public final CompoundParameter attenRate = new CompoundParameter("Attenuation Rate", 0, 1)
-    .setDescription("Speed to attenuate diffusion");
-  
-  public TestPattern(LX lx) {
-    super(lx);
-    // addParameter("mode", this.mode);
-    pulse.setMode(BooleanParameter.Mode.MOMENTARY);
-    addParameter("pos", this.pos);
-    // addParameter("width", this.wth);
-    addParameter("pulse", this.pulse);
-    // addParameter("speed", this.speed);
-    // addParameter("attenRate", this.attenRate);
-    timeRun = 0;
-    lastColors = new double[300];
-    lastPos = 1;
-  }
-  
-  public void updateColors() {
-    int pos = this.pos.getValuei();
-    double[] brightnesses = new double[300];
-    if (pos != lastPos) {
-      lastPos = pos;
-      lastColors = new double[300];
-    }
-    
-    Storytime storytime = (Storytime)model;
-    Lampshade lampshade = storytime.lampshade;
-    Lampshade.Fixture f = (Lampshade.Fixture)lampshade.fixtures.get(0);
-    for (int i = 0; i < f.lampStrips.size(); i++) { 
-      LampStrip s = f.lampStrips.get(i);
-      if (i != pos-1)
-         for(LXPoint p : s.points)
-           colors[p.index] = LXColor.gray(0);
-      else {
-        if(this.pulse.getValueb()) {
-          lastColors[70] = 1;
-          colors[s.points[70].index] = LXColor.gray(0);
-          lastColors[220] = 1;
-          colors[s.points[220].index] = LXColor.gray(0);
-        }
-        // System.out.println(brightnesses[70]);
-        for(int j = 0; j < s.points.length; j++) {
-          LXPoint p = s.points[j];
-          if ((j < 140) || (j >= 150 && j < 290)) {
-              
-              double leftVal, rightVal;
-              if(j < 140) { 
-                leftVal = (j > 0) ? lastColors[j-1] : 0;
-                rightVal = (j < 139) ? lastColors[j+1] : 0;
-              }
-              else {
-                leftVal = (j > 150) ? lastColors[j-1] : 0;
-                rightVal = (j < 289) ? lastColors[j+1] : 0;
-              }
-              brightnesses[j] = Math.min(1, Math.max(0, attenuate*lastColors[j] + d*(leftVal - 2*lastColors[j] + rightVal)));
-              colors[p.index] = LXColor.gray(brightnesses[j]*100);
-              // if (j == 70)
-                // System.out.println(colors[p.index]);
-          } else
-              colors[p.index] = LXColor.gray(0);
-        }
-        lastColors = brightnesses;
-        // System.out.println(colors[s.points[69].index]);
-      }
-    }
-  }
-  
-  public void run(double deltaMs) {
-    // float falloff = 100 / this.wth.getValuef();
-    // float n = 0;
-    if(this.pulse.getValueb()) {
-      updateColors();
-    }
-    timeRun += deltaMs;
-    if(timeRun >= 5 && !this.pulse.getValueb()) {
-      timeRun = 0;
-      updateColors();
-    }
-    
-  }
 }
