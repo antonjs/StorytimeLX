@@ -44,6 +44,51 @@ public static class PlanePattern extends LXPattern {
 }
 
 @LXCategory("Glass")
+public class GlassPainter extends LXPattern {
+  public final DiscreteParameter xCoord;
+  public final DiscreteParameter yCoord;
+  public final float falloff = 0.9;
+  
+  public PImage glassImage;
+  public PGraphics glassGraphics;
+  
+  public GlassPainter(LX lx) {
+    super(lx);
+    
+    Storytime story = (Storytime)lx.model;
+    xCoord = new DiscreteParameter("X", 0, LONG_SIDE_LED_COUNT)
+              .setDescription("X Pixel Coord");
+    yCoord = new DiscreteParameter("Y", 0, LONG_SIDE_LED_COUNT)
+              .setDescription("X Pixel Coord");
+              
+    addParameter("X", this.xCoord);
+    addParameter("Y", this.yCoord);
+    
+    glassImage = createImage(LONG_SIDE_LED_COUNT + 1, 2 * story.lampshade.lampStrips.size(), RGB);
+  }
+  
+  void paint() {
+    glassGraphics.beginDraw();
+    glassGraphics.circle(xCoord.getValuef(),yCoord.getValuef(),5);
+    glassGraphics.endDraw();
+  }
+  
+  public void run(double deltaMs) {
+    Lampshade lampshade = ((Storytime)model).lampshade;
+    
+    //clearColors();
+    for (int i = 0; i < lampshade.lampStrips.size(); i++) {
+      LampStrip ls = lampshade.lampStrips.get(i);
+      
+      for (int j = 0; j < LONG_SIDE_LED_COUNT + 1; j++) {
+        colors[j == 0 ? ls.left.get(ls.left.size()-1).index : ls.top.get(j-1).index] = glassGraphics.get(j,i*2);
+        colors[j == 0 ? ls.right.get(ls.right.size()-1).index : ls.bottom.get(j-1).index] = glassGraphics.get(LONG_SIDE_LED_COUNT + 1 - j, i*2+1); // Bottom is indexed right-to-left
+      }
+    }
+  }
+}
+
+@LXCategory("Glass")
 public class GlassMap extends LXPattern {
   public final DiscreteParameter strip;
   
@@ -80,6 +125,7 @@ public class GlassMap extends LXPattern {
 @LXCategory("Test")
 public static class LampStripIterator extends LXPattern {
   public final DiscreteParameter strip;
+  public final BooleanParameter corners;
   
   public LampStripIterator(LX lx) {
     super(lx);
@@ -87,6 +133,9 @@ public static class LampStripIterator extends LXPattern {
     Storytime story = (Storytime)lx.model;
     strip = new DiscreteParameter("Strip", 0, story.lampshade.lampStrips.size())
               .setDescription("Position of the center of the plane");
+              
+    corners = new BooleanParameter("Corners", false)
+              .setDescription("Highlight corners");
               
     //LXParameterListener updateGamma = new LXParameterListener() {
     //  @Override
@@ -98,14 +147,28 @@ public static class LampStripIterator extends LXPattern {
     //this.gamma.addListener(updateGamma);
               
     addParameter("strip", this.strip);
+    addParameter("corners", this.corners);
   }
   
   public void run(double deltaMs) {
     LampStrip s = ((Storytime)model).lampshade.lampStrips.get(strip.getValuei());
     
     clearColors();
-    for (LXPoint p : s.getPoints()) {
-      colors[p.index] = LXColor.gray(100);
+    
+    if (corners.getValueb()) {
+      //colors[s.getPoints().get(0).index] = LXColor.WHITE;
+      //colors[s.getPoints().get(0).index + LONG_SIDE_LED_COUNT] = LXColor.RED;  
+      //colors[s.getPoints().get(0).index + LONG_SIDE_LED_COUNT + SHORT_SIDE_LED_COUNT] = LXColor.GREEN;    
+      //colors[s.getPoints().get(0).index + LONG_SIDE_LED_COUNT*2 + SHORT_SIDE_LED_COUNT] = LXColor.BLUE;  
+      
+      colors[s.top.get(0).index] = LXColor.WHITE;
+      colors[s.top.get(s.top.size()-1).index] = LXColor.RED;
+      colors[s.bottom.get(0).index] = LXColor.GREEN;
+      colors[s.bottom.get(s.top.size()-1).index] = LXColor.BLUE;
+    } else {
+      for (LXPoint p : s.getPoints()) {
+        colors[p.index] = LXColor.gray(100);
+      }
     }
   }
 }
