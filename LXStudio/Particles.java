@@ -4,6 +4,69 @@ import heronarts.lx.model.*;
 import heronarts.lx.transform.*;
 import heronarts.lx.color.*;
 
+// Star
+class ParticleStar extends LightPoint {
+  public float vx = 0.0f;
+  public float vy = 0.0f;
+  public float vz = 0.0f;
+
+  ParticleStar(){}
+  ParticleStar(float x, float y, float z, float radius, int color, float vx, float vy, float vz) {
+    super(x, y, z, radius, color);
+    this.vx = vx;
+    this.vy = vy;
+    this.vz = vz;
+  }
+
+  public void update(double deltaTime) {
+    this.x += (float)vx * deltaTime;
+    this.y += (float)vy * deltaTime;
+    this.z += (float)vz * deltaTime;
+  }
+}
+
+// Particle
+// class Particle extends PrimitivePoint {
+//   public int      mColorEnd         = LXColor.WHITE;
+//   public float    mFalloffEnd       = 10.0f;
+//   public LXVector mVelocity         = new LXVector(0, 0, 0);
+//   public double   mLifetimeMs       = 0;
+//   public double   mCurrentTimeMs    = 0;
+//
+//   Particle() {}
+//   Particle(LXVector iPosition, LXVector iVelocity, double iLifetimeMs, float iFalloffStart, float iFalloffEnd, int iColorStart, int iColorEnd) {
+//     super(iPosition, iFalloffStart, iColorStart);
+//     mVelocity   = iVelocity;
+//     mFalloffEnd = iFalloffEnd;
+//     mLifetimeMs = iLifetimeMs;
+//     mColorEnd   = iColorEnd;
+//   }
+//
+//   public boolean isAlive() {
+//     return (mCurrentTimeMs < mLifetimeMs);
+//   }
+//
+//   public void update(double deltaMs) {
+//     mCurrentTimeMs += deltaMs;
+//
+//     mPosition.x += mVelocity.x * (mCurrentTimeMs / 1000.0);
+//     mPosition.y += mVelocity.y * (mCurrentTimeMs / 1000.0);
+//     mPosition.z += mVelocity.z * (mCurrentTimeMs / 1000.0);
+//   }
+//
+//   public int getColor(LXPoint iPoint) {
+//     float  distance  = Physics.distance(iPoint, mPosition);
+//     double timeScale = mCurrentTimeMs / mLifetimeMs;
+//     float  adjustedFalloff;
+//
+//     if(distance > mFalloff) {
+//       return 0;
+//     }
+//
+//     return LXColor.scaleBrightness(LXColor.lerp(mColor, mColorEnd, timeScale), 1 - (distance / mFalloff));
+//   }
+// }
+
 // Sphere
 // class ParticleSphere extends Sphere {
 //   PrimitiveSphere() {}
