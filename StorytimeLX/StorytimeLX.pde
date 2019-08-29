@@ -46,7 +46,9 @@ int[] getIndices(List<LXPoint> points) {
 
 boolean addDatagram(LXDatagramOutput output, String ip, int universe, int[] indices) {
   try {
-    ArtNetDatagram dg = new ArtNetDatagram(indices, universe);
+    int[] first300 = new int[300];
+    for (int i = 0; i < 300; i++) first300[i] = indices[i];
+    ArtNetDatagram dg = new ArtNetDatagram(first300, universe);
     dg.setAddress(ip);
     dg.setByteOrder(LXDatagram.ByteOrder.RGB);  
     output.addDatagram(dg);
@@ -62,8 +64,8 @@ boolean addDatagram(LXDatagramOutput output, String ip, int universe, List<LXPoi
 }
 
 void initialize(final heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStudio.UI ui) {
-  final double MAX_BRIGHTNESS = 1.0;
-  final String ARTNET_IP = "192.168.0.109";
+  final double MAX_BRIGHTNESS = 0.5;
+  final String ARTNET_IP = "192.168.0.100";
   
   Storytime story = (Storytime)lx.model;
 
@@ -76,32 +78,44 @@ void initialize(final heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStu
       i++;
   
       // Add an ArtNetDatagram which sends all of the points in the strip
-      println("Adding strip");
-      println("Universe", i);
-      println(getIndices(strip.getPoints()));
-      println();
+      println("Adding strip: ", i, " -> ", i);
       
-      addDatagram(output, ARTNET_IP, i, strip.getPoints());
+      //addDatagram(output, ARTNET_IP, i, strip.getPoints());
     }
     
     // Add pole strips. The astute reader will notice we're using the iterator from
     // above---we assume that the pole strips will be just the next main controller
     // outputs after the lampshade.
+    //
+    // Pole is on universes 18 and 19
     for (List<LXPoint> strip : story.pole.strips) {
       i++;
       
-      addDatagram(output, ARTNET_IP, i, strip);
+      println("Adding pole: ", i, " -> ", i);
+      //addDatagram(output, ARTNET_IP, i, strip);
     }
     
     // Add books. These guys are on a remote controller; universes tbd but hopefully
-    // sequential. That's what we'll do for now.
-    addDatagram(output, ARTNET_IP, ++i, story.topBook.getPoints());
-    addDatagram(output, ARTNET_IP, ++i, story.bottomBook.getPoints());
+    // sequential. That's what we'll do for now. 
+    i = 20; // Start book universes at 20 
+    for (List<LXPoint> strip : story.topBook.strips) {
+      println("Adding top book: ", i);
+      addDatagram(output, ARTNET_IP, i, strip);
+      i += 2;
+    }
+    
+    //for (List<LXPoint> strip : story.bottomBook.strips) {
+    //  i++;
+          
+    //  println("Adding bottom book: ", i);
+    //  //addDatagram(output, ARTNET_IP, i, strip);
+    //  break;
+    //}
     
     output.brightness.setNormalized(MAX_BRIGHTNESS);
     
     // Add the datagram output to the LX engine
-    //lx.addOutput(output);
+    lx.addOutput(output);
   } catch (Exception x) {
     x.printStackTrace();
   }

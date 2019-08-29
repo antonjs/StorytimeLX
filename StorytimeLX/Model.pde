@@ -7,6 +7,7 @@ LXModel buildModel() {
 }
 
 public final static float LEDS_PER_METER = 60;
+public final static float LEDS_PER_STRIP = 300;
 public final static float LED_SPACING = 1 * M / LEDS_PER_METER;
 
 public final static float SHORT_SIDE_LENGTH = 6 * IN;
@@ -228,10 +229,15 @@ public static class Pole extends LXModel {
       t.push();
       
       final float locations[][] = {
-        {POLE_WIDTH/2, 0, -1 * POLE_WIDTH / 2}, // Front inside
-        {-1 * POLE_WIDTH/2, 0, -1 * POLE_WIDTH / 2}, // Back inside
-        {POLE_WIDTH/2, 0, 1 * POLE_WIDTH / 2}, // Front outside
-        {-1 * POLE_WIDTH/2, 0, 1 * POLE_WIDTH / 2} // Back outside
+        // If we had four pole strips (we don't)
+        //{POLE_WIDTH/2, 0, -1 * POLE_WIDTH / 2}, // Front inside
+        //{-1 * POLE_WIDTH/2, 0, -1 * POLE_WIDTH / 2}, // Back inside
+        //{POLE_WIDTH/2, 0, 1 * POLE_WIDTH / 2}, // Front outside
+        //{-1 * POLE_WIDTH/2, 0, 1 * POLE_WIDTH / 2} // Back outside
+        
+        // Two strips
+        {0, 0, -1 * POLE_WIDTH / 2},
+        {0, 0, 1 * POLE_WIDTH / 2}
       };
       
       for (int i = 0; i < locations.length; i++) {
@@ -288,38 +294,34 @@ public static class Book extends LXModel {
             strip.add(p);
             
             t.translate(0, 0, -1 * LED_SPACING);
-            strips.add(strip);
         }
         
-        strip = new ArrayList<LXPoint>();
         for (int i = 0; i < l / M * LEDS_PER_METER; i++) {
             LXPoint p = new LXPoint(t);
             addPoint(p);
             strip.add(p);
             
             t.translate(1 * LED_SPACING, 0, 0);
-            strips.add(strip);
         }
         
-        strip = new ArrayList<LXPoint>();
         for (int i = 0; i < w / M * LEDS_PER_METER; i++) {
             LXPoint p = new LXPoint(t);
             addPoint(p);
             strip.add(p);
             
             t.translate(0, 0, 1 * LED_SPACING);
-            strips.add(strip);
         }
         
-        strip = new ArrayList<LXPoint>();
         for (int i = 0; i < l / M * LEDS_PER_METER; i++) {
             LXPoint p = new LXPoint(t);
             addPoint(p);
             strip.add(p);
             
             t.translate(-1 * LED_SPACING, 0, 0);
-            strips.add(strip);
         }
+        
+        strips.add(strip);
+        println("Added book strip, ", strip.size(), " points");
         t.pop();
         
         t.translate(0, -1 * h, 0);
