@@ -1,6 +1,6 @@
 {
   "version": "0.1",
-  "timestamp": 1567047986790,
+  "timestamp": 1567049019624,
   "engine": {
     "id": 1,
     "class": "heronarts.lx.LXEngine",
@@ -208,6 +208,29 @@
               "triggers": []
             },
             "autoCycleEnabled": true
+          },
+          {
+            "id": 444,
+            "class": "heronarts.lx.pattern.GradientPattern",
+            "modulationColor": -16711715,
+            "parameters": {
+              "label": "Gradient",
+              "gradient": 0.0,
+              "spreadX": 0.0,
+              "spreadY": 0.0,
+              "spreadZ": 0.0,
+              "spreadR": 0.0,
+              "offsetX": 0.0,
+              "offsetY": 0.0,
+              "offsetZ": 0.0,
+              "mirror": true
+            },
+            "modulation": {
+              "modulators": [],
+              "modulations": [],
+              "triggers": []
+            },
+            "autoCycleEnabled": true
           }
         ]
       },
@@ -333,7 +356,7 @@
           }
         ],
         "clips": [],
-        "patternIndex": 1,
+        "patternIndex": 3,
         "patterns": [
           {
             "id": 193,
@@ -380,6 +403,21 @@
               "speed": 30.0,
               "mode": 0,
               "paletteNum": 2
+            },
+            "modulation": {
+              "modulators": [],
+              "modulations": [],
+              "triggers": []
+            },
+            "autoCycleEnabled": true
+          },
+          {
+            "id": 446,
+            "class": "StorytimeLX$PremadeStainedGlassPattern",
+            "modulationColor": -16771073,
+            "parameters": {
+              "label": "PremadeStainedGlass",
+              "imageNum": 0
             },
             "modulation": {
               "modulators": [],
@@ -540,19 +578,19 @@
           "attack": 10.0,
           "release": 100.0,
           "slope": 4.5,
-          "Band-1": 0.4897393744034685,
-          "Band-2": 0.5290805299161763,
-          "Band-3": 0.5026410626672542,
-          "Band-4": 0.41194375154754326,
-          "Band-5": 0.316217937419777,
+          "Band-1": 0.2972421512373483,
+          "Band-2": 0.389650449133392,
+          "Band-3": 0.39062804199431955,
+          "Band-4": 0.3711435394975996,
+          "Band-5": 0.2623176993271187,
           "Band-6": 0.0,
           "Band-7": 0.0,
-          "Band-8": 0.04883283075001976,
-          "Band-9": 0.04179017594870482,
-          "Band-10": 0.09613308143677857,
-          "Band-11": 0.11186604665080979,
-          "Band-12": 0.1281489452351554,
-          "Band-13": 0.012379765051353409,
+          "Band-8": 0.0,
+          "Band-9": 0.0,
+          "Band-10": 0.0,
+          "Band-11": 0.0,
+          "Band-12": 0.0,
+          "Band-13": 0.0,
           "Band-14": 0.0,
           "Band-15": 0.0,
           "Band-16": 0.0
