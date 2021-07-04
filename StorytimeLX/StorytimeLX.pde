@@ -130,17 +130,17 @@ void initialize(final heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStu
     // Add books. These guys are on a remote controller; universes tbd but hopefully
     // sequential. That's what we'll do for now. 
     i = 20; // Start book universes at 20 
+    universe = 58;
     for (List<LXPoint> strip : story.topBook.strips) {
       println("Adding top book: ", i);
-      i += addDatagram(output, ARTNET_IP, i * 3 - 2, strip);
-      //i += 2;
+      universe += addDatagram(output, ARTNET_IP, universe, strip);
+      i++;
     }
     
     for (List<LXPoint> strip : story.bottomBook.strips) {
-      i++;
-          
       println("Adding bottom book: ", i);
-      i += addDatagram(output, ARTNET_IP, i * 3 - 2, strip);
+      universe += addDatagram(output, ARTNET_IP, universe, strip);
+      i++;
     }
     
     output.brightness.setNormalized(MAX_BRIGHTNESS);
