@@ -1,6 +1,6 @@
 {
   "version": "0.1",
-  "timestamp": 1625131910737,
+  "timestamp": 1625136344463,
   "engine": {
     "id": 1,
     "class": "heronarts.lx.LXEngine",
@@ -15,7 +15,7 @@
       "crossfader": 0.5,
       "crossfaderBlendMode": 0,
       "speed": 1.0,
-      "focusedChannel": 2,
+      "focusedChannel": 3,
       "cueA": false,
       "cueB": false,
       "multithreaded": true,
@@ -32,9 +32,9 @@
         "hueMode": 2,
         "color/brightness": 100.0,
         "color/saturation": 100.0,
-        "color/hue": 263.1699259877121,
-        "period": 30000.0,
-        "range": 10.0
+        "color/hue": 247.64020059733508,
+        "period": 6711.73106925562,
+        "range": 154.1269826889038
       }
     },
     "channels": [
@@ -81,7 +81,7 @@
         "patternIndex": 2,
         "patterns": [
           {
-            "id": 23,
+            "id": 633,
             "class": "heronarts.lx.pattern.IteratorPattern",
             "modulationColor": -16711719,
             "parameters": {
@@ -118,9 +118,9 @@
             "modulationColor": -65373,
             "parameters": {
               "label": "Gradient",
-              "gradient": 93.60000595450401,
-              "spreadX": 0.5399999879300594,
-              "spreadY": 0.6800000071525574,
+              "gradient": 208.80000337958336,
+              "spreadX": 1.0,
+              "spreadY": 0.0,
               "spreadZ": 0.03999999910593033,
               "spreadR": 0.0,
               "offsetX": 0.0,
@@ -307,7 +307,7 @@
         "parameters": {
           "label": "Shade P",
           "arm": false,
-          "selected": true,
+          "selected": false,
           "enabled": true,
           "cue": false,
           "fader": 1.0,
@@ -340,7 +340,7 @@
           }
         ],
         "clips": [],
-        "patternIndex": 2,
+        "patternIndex": 3,
         "patterns": [
           {
             "id": 193,
@@ -421,7 +421,7 @@
         "parameters": {
           "label": "Shade C",
           "arm": false,
-          "selected": false,
+          "selected": true,
           "enabled": true,
           "cue": false,
           "fader": 1.0,
@@ -526,7 +526,7 @@
       "clips": []
     },
     "tempo": {
-      "id": 21,
+      "id": 25,
       "class": "heronarts.lx.Tempo",
       "modulationColor": -30720,
       "parameters": {
@@ -552,7 +552,7 @@
         "mode": 0
       },
       "meter": {
-        "id": 19,
+        "id": 23,
         "class": "heronarts.lx.audio.GraphicMeter",
         "modulationColor": -16711818,
         "parameters": {
@@ -564,19 +564,19 @@
           "attack": 10.0,
           "release": 100.0,
           "slope": 4.5,
-          "Band-1": 0.2599756380157813,
-          "Band-2": 0.38908526657918585,
-          "Band-3": 0.44172520679773297,
-          "Band-4": 0.49436502942934124,
-          "Band-5": 0.42273954075346865,
-          "Band-6": 0.2602786776920073,
-          "Band-7": 0.23936052495358184,
-          "Band-8": 0.22358025945068383,
-          "Band-9": 0.3312222849274601,
-          "Band-10": 0.31278954616161947,
-          "Band-11": 0.1554347854830409,
-          "Band-12": 0.2456927894027391,
-          "Band-13": 0.22199383829192332,
+          "Band-1": 0.459943375345516,
+          "Band-2": 0.5610577120296047,
+          "Band-3": 0.5837401518240057,
+          "Band-4": 0.6005363955936587,
+          "Band-5": 0.504209702538527,
+          "Band-6": 0.2747188332680933,
+          "Band-7": 0.15519283640944825,
+          "Band-8": 0.21608727675371087,
+          "Band-9": 0.2530618871115472,
+          "Band-10": 0.2063792374671246,
+          "Band-11": 0.07893656282011341,
+          "Band-12": 0.0,
+          "Band-13": 0.0,
           "Band-14": 0.0,
           "Band-15": 0.0,
           "Band-16": 0.0
@@ -630,11 +630,11 @@
       "parameters": {
         "label": "OSC",
         "receiveHost": "0.0.0.0",
-        "receivePort": 3030,
-        "receiveActive": false,
+        "receivePort": 7000,
+        "receiveActive": true,
         "transmitHost": "localhost",
-        "transmitPort": 3131,
-        "transmitActive": false
+        "transmitPort": 9000,
+        "transmitActive": true
       }
     },
     "midi": {
@@ -662,9 +662,9 @@
         "centerPoint": false,
         "camera": {
           "active": false,
-          "radius": 220.33173636827257,
-          "theta": 0.029999999999991898,
-          "phi": 0.5077166738510145,
+          "radius": 235.80276835571894,
+          "theta": -0.6600000000000084,
+          "phi": 0.43571667385101553,
           "x": 46.2126350402832,
           "y": -30.697914123535156,
           "z": -2.5372161865234375
@@ -672,9 +672,9 @@
         "cue": [
           {
             "active": false,
-            "radius": 220.33173636827257,
-            "theta": 0.029999999999991898,
-            "phi": 0.5077166738510145,
+            "radius": 235.80276835571894,
+            "theta": -0.6600000000000084,
+            "phi": 0.43571667385101553,
             "x": 46.2126350402832,
             "y": -30.697914123535156,
             "z": -2.5372161865234375

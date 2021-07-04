@@ -65,7 +65,8 @@ boolean addDatagram(LXDatagramOutput output, String ip, int universe, List<LXPoi
 
 void initialize(final heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStudio.UI ui) {
   final double MAX_BRIGHTNESS = 0.5;
-  final String ARTNET_IP = "192.168.0.100";
+  //final String ARTNET_IP = "192.168.0.100";
+  final String ARTNET_IP = "127.0.0.1";
   
   Storytime story = (Storytime)lx.model;
 
@@ -80,7 +81,7 @@ void initialize(final heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStu
       // Add an ArtNetDatagram which sends all of the points in the strip
       println("Adding strip: ", i, " -> ", i);
       
-      //addDatagram(output, ARTNET_IP, i, strip.getPoints());
+      addDatagram(output, ARTNET_IP, i, strip.getPoints());
     }
     
     // Add pole strips. The astute reader will notice we're using the iterator from
@@ -92,7 +93,7 @@ void initialize(final heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStu
       i++;
       
       println("Adding pole: ", i, " -> ", i);
-      //addDatagram(output, ARTNET_IP, i, strip);
+      addDatagram(output, ARTNET_IP, i, strip);
     }
     
     // Add books. These guys are on a remote controller; universes tbd but hopefully
