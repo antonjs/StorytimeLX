@@ -33,6 +33,11 @@ void setup() {
   stainedGlass = new PImage[2];
   stainedGlass[0] = loadImage(dataPath("").concat("/stained-glass-history.jpg")); 
   stainedGlass[1] = loadImage(dataPath("").concat("/stained-glass-test-close.jpg")); 
+  
+  if (lx.getProject() == null) {
+    System.out.println("Loading the Default project");
+    lx.openProject(this.saveFile("Default.lxp"));
+  }
 }
 
 int[] getIndices(List<LXPoint> points) {
@@ -40,38 +45,64 @@ int[] getIndices(List<LXPoint> points) {
   for (int i = 0; i < points.size(); i++) {
     indices[i] = points.get(i).index;
   }
-  
+    
   return indices;
 }
 
-boolean addDatagram(LXDatagramOutput output, String ip, int universe, int[] indices) {
+//boolean addDatagram(LXDatagramOutput output, String ip, int universe, int[] indices) {
+//  try {
+//    int[] first300 = new int[300];
+//    for (int i = 0; i < 300; i++) first300[i] = indices[i];
+//    ArtNetDatagram dg = new ArtNetDatagram(first300, universe);
+//    dg.setAddress(ip);
+//    dg.setByteOrder(LXDatagram.ByteOrder.RGB);  
+//    output.addDatagram(dg);
+//  } catch (Exception e) {
+//    return false;
+//  }
+  
+//  return true;
+//}
+
+int addDatagram(LXDatagramOutput output, String ip, int startUniverse, List<LXPoint> points) {
+  int i = 0;
   try {
-    int[] first300 = new int[300];
-    for (int i = 0; i < 300; i++) first300[i] = indices[i];
-    ArtNetDatagram dg = new ArtNetDatagram(first300, universe);
-    dg.setAddress(ip);
-    dg.setByteOrder(LXDatagram.ByteOrder.RGB);  
-    output.addDatagram(dg);
+    for (i = 0; i < points.size() / 100; i++) {
+      int universe = startUniverse + i;
+      int startPoint = i * 100;
+      int endPoint = min(i * 100 + 100, points.size());
+      
+      ArtNetDatagram dg = new ArtNetDatagram(getIndices(points.subList(startPoint, endPoint)), universe);
+      dg.setAddress(ip);
+      dg.setByteOrder(LXDatagram.ByteOrder.RGB);
+      output.addDatagram(dg);
+      
+      println("Adding universe ", universe, " with points ", startPoint, "-", endPoint);
+    }
   } catch (Exception e) {
-    return false;
+    println(e);
+    return 0;
   }
   
-  return true;
+  return i;
 }
 
-boolean addDatagram(LXDatagramOutput output, String ip, int universe, List<LXPoint> points) {
-  return addDatagram(output, ip, universe, getIndices(points));
-}
+
+//boolean addDatagram(LXDatagramOutput output, String ip, int universe, List<LXPoint> points) {
+//  return addDatagram(output, ip, universe, getIndices(points));
+//}
 
 void initialize(final heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStudio.UI ui) {
   final double MAX_BRIGHTNESS = 0.5;
-  //final String ARTNET_IP = "192.168.0.100";
-  final String ARTNET_IP = "127.0.0.1";
+  final String ARTNET_IP = "192.168.0.100";
+  //final String ARTNET_IP = "127.0.0.1";
+  //final int UNIVERSE_OFFSET = 3;
   
   Storytime story = (Storytime)lx.model;
 
   try {
     int i = 0;
+    int universe = 1;
     // Construct a new DatagramOutput object
     LXDatagramOutput output = new LXDatagramOutput(lx);
       
@@ -81,7 +112,7 @@ void initialize(final heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStu
       // Add an ArtNetDatagram which sends all of the points in the strip
       println("Adding strip: ", i, " -> ", i);
       
-      addDatagram(output, ARTNET_IP, i, strip.getPoints());
+      universe += addDatagram(output, ARTNET_IP, i * 3 - 2, strip.getPoints());
     }
     
     // Add pole strips. The astute reader will notice we're using the iterator from
@@ -93,7 +124,7 @@ void initialize(final heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStu
       i++;
       
       println("Adding pole: ", i, " -> ", i);
-      addDatagram(output, ARTNET_IP, i, strip);
+      universe += addDatagram(output, ARTNET_IP, i * 3 - 2, strip);
     }
     
     // Add books. These guys are on a remote controller; universes tbd but hopefully
@@ -101,17 +132,16 @@ void initialize(final heronarts.lx.studio.LXStudio lx, heronarts.lx.studio.LXStu
     i = 20; // Start book universes at 20 
     for (List<LXPoint> strip : story.topBook.strips) {
       println("Adding top book: ", i);
-      addDatagram(output, ARTNET_IP, i, strip);
-      i += 2;
+      i += addDatagram(output, ARTNET_IP, i * 3 - 2, strip);
+      //i += 2;
     }
     
-    //for (List<LXPoint> strip : story.bottomBook.strips) {
-    //  i++;
+    for (List<LXPoint> strip : story.bottomBook.strips) {
+      i++;
           
-    //  println("Adding bottom book: ", i);
-    //  //addDatagram(output, ARTNET_IP, i, strip);
-    //  break;
-    //}
+      println("Adding bottom book: ", i);
+      i += addDatagram(output, ARTNET_IP, i * 3 - 2, strip);
+    }
     
     output.brightness.setNormalized(MAX_BRIGHTNESS);
     
