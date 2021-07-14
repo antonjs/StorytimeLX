@@ -43,6 +43,108 @@ public static class PlanePattern extends LXPattern {
   }
 }
 
+@LXCategory("Tools")
+public class Countdown extends LXPattern {
+    public final CompoundParameter time = new CompoundParameter("Time", 30000, 0, 600000)
+      .setDescription("Countdown time");
+    public final CompoundParameter hue = new CompoundParameter("Hue", 0, 0, 360)
+      .setDescription("Color hue for warning");
+    public final CompoundParameter flashStart = new CompoundParameter("Flash Start", 10000, 0, 600000)
+      .setDescription("Start flashing this long before the countdown finishes");
+    public final CompoundParameter flashTime = new CompoundParameter("Flash Time", 5000, 0, 600000)
+      .setDescription("Flash for this long after the countdown finishes");
+        public final BooleanParameter alpha = new BooleanParameter("Alpha", false)
+      .setDescription("Transparent background for countdown");
+    public final BooleanParameter trigger = new BooleanParameter("Start", false)
+      .setDescription("Start the countdown")
+      .setMode(BooleanParameter.Mode.MOMENTARY);
+    public final BooleanParameter stop = new BooleanParameter("Stop", false)
+      .setDescription("Stop the countdown")
+      .setMode(BooleanParameter.Mode.MOMENTARY);
+      
+    public final LinearEnvelope countdownModulator = new LinearEnvelope(0, 1, 10000);
+    public final SinLFO flashModulator = new SinLFO(0, 1, 1000);
+      
+      //.setUnits(LXParameter.Units.SECONDS);
+  
+  public Countdown(LX lx) {
+    super(lx);
+    addParameter("time", this.time);
+    addParameter("hue", this.hue);
+    addParameter("flashStart", this.flashStart);
+    addParameter("flashTime", this.flashTime);
+    addParameter("alpha", this.alpha);
+    addParameter("trigger", this.trigger);
+    addParameter("stop", this.stop);
+        
+    addModulator(this.countdownModulator);
+    addModulator(this.flashModulator);
+    
+    time.setUnits(LXParameter.Units.MILLISECONDS);
+    flashTime.setUnits(LXParameter.Units.MILLISECONDS);
+    flashStart.setUnits(LXParameter.Units.MILLISECONDS);
+    
+    countdownModulator.setPeriod(time);
+    flashModulator.setLooping(false);
+    
+    this.trigger.addListener(new LXParameterListener() {
+      public @Override
+      void onParameterChanged(LXParameter param) {
+        if (param.getValue() == 0) return;
+
+        countdownModulator.trigger();
+        println("Starting countdown");
+        println(LXColor.alpha(LXColor.BLACK));
+      }
+    });
+    
+    this.stop.addListener(new LXParameterListener() {
+      public @Override
+      void onParameterChanged(LXParameter param) {
+        if (param.getValue() == 0) return;
+        
+        countdownModulator.stop();
+        println("Stopping countdown");
+      }
+    });
+  }
+  
+  public void run(double deltaMs) {
+    Lampshade lampshade = ((Storytime)model).lampshade;
+
+    if (!countdownModulator.isRunning() && !flashModulator.isRunning()) {
+      for (LXPoint p : lampshade.points) {
+        colors[p.index] = LXColor.rgba(0,0,0,0);
+      }
+      
+      return;
+    }
+    
+    int col = LXColor.hsb(hue.getValue(), 100, 100);
+    int bg = LXColor.hsba(0, 0, 0, 1 - alpha.getNormalized());
+    
+    double countdownScale = (countdownModulator.getPeriod() - flashTime.getValue()) / countdownModulator.getPeriod();
+    double leftBound = lampshade.xMin + lampshade.xRange * Math.min(countdownModulator.getNormalized() / countdownScale * 0.5, 0.5);
+    double rightBound = lampshade.xMax - lampshade.xRange * Math.min(countdownModulator.getNormalized() / countdownScale * 0.5, 0.5);
+    
+    for (LXPoint p : lampshade.points) {
+      if (p.x < leftBound || p.x > rightBound) {
+        colors[p.index] = col;
+      }  else {
+        double dist = Math.min(Math.abs(leftBound - p.x), Math.abs(p.x - rightBound));
+        colors[p.index] = LXColor.add(bg, col, 1 - LXUtils.constrain(dist/3, 0, 1));
+      }
+      
+      colors[p.index] = LXColor.multiply(colors[p.index], LXColor.BLACK, flashModulator.getValue());
+      //subtractColor(p.index, LXColor.hsba(0,0,0, Math.min(flashModulator.getValue(), alpha.getNormalized())));
+    }
+    
+    if (!flashModulator.isRunning() && (1 - countdownModulator.getValue()) * countdownModulator.getPeriod() < flashStart.getValue() + flashTime.getValue()) {
+      flashModulator.trigger();
+    }
+  }
+}
+
 @LXCategory("Glass")
 public class GlassPainter extends LXPattern {
   public final DiscreteParameter xCoord;
