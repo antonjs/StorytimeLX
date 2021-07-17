@@ -43,6 +43,75 @@ public static class PlanePattern extends LXPattern {
   }
 }
 
+public static class PlaneCutPattern extends LXPattern {
+  
+  public enum Axis {
+    X, Y, Z
+  };
+  
+  public final EnumParameter<Axis> axis =
+    new EnumParameter<Axis>("Axis", Axis.X)
+    .setDescription("Which axis the plane is drawn across");
+  
+  public final CompoundParameter x = new CompoundParameter("X", 0, 100)
+    .setDescription("Position of the center of the plane");
+  public final CompoundParameter y = new CompoundParameter("Y", 0, 100)
+    .setDescription("Position of the center of the plane");
+  public final CompoundParameter z = new CompoundParameter("Z", 0, -100, 100)
+    .setDescription("Position of the center of the plane");
+    
+  public final CompoundParameter pitch = new CompoundParameter("Pitch", 0, TWO_PI)
+    .setDescription("Pitch of the plane");
+  public final CompoundParameter roll = new CompoundParameter("Roll", 0, TWO_PI)
+    .setDescription("Pitch of the plane");
+    public final CompoundParameter yaw = new CompoundParameter("Yaw", 0, TWO_PI)
+    .setDescription("Pitch of the plane");
+  
+  public final CompoundParameter wth = new CompoundParameter("Width", .4, 0, 1)
+    .setDescription("Thickness of the plane");
+  
+  public PlaneCutPattern(LX lx) {
+    super(lx);
+    addParameter("x", this.x);
+    addParameter("y", this.y);
+    addParameter("z", this.z);
+    addParameter("pitch", this.pitch);
+    addParameter("roll", this.roll);
+    addParameter("yaw", this.yaw);
+    
+    addParameter("width", this.wth);
+  }
+  
+  public void run(double deltaMs) {
+    //LXVector norm = new LXVector(1, 0, 0);
+    //norm.rotate(,,,)
+    float falloff = 1 / this.wth.getValuef();
+    
+    LXProjection proj = new LXProjection(lx.model);
+    proj.center()
+      .rotateX(-roll.getValuef())
+      .rotateY(-yaw.getValuef())
+      .rotateZ(-pitch.getValuef())
+      .translate(-x.getValuef(), -y.getValuef(), -z.getValuef());
+      
+    for (LXVector v : proj) {
+      //colors[v.index] = LXColor.gray(v.z < 1 && v.z > -1 ? 100 : 0);
+      colors[v.index] = LXColor.gray(max(0, 100 - abs(v.z) / wth.getValuef()));
+    }
+    
+    //float pos = this.pos.getValuef();
+    //float n = 0;
+    //for (LXPoint p : model.points) {
+    //  switch (this.axis.getEnum()) {
+    //  case X: n = p.xn; break;
+    //  case Y: n = p.yn; break;
+    //  case Z: n = p.zn; break;
+    //  }
+    //  colors[p.index] = LXColor.gray(max(0, 100 - falloff*abs(n - pos))); 
+    //}
+  }
+}
+
 @LXCategory("Tools")
 public class Countdown extends LXPattern {
     public final CompoundParameter time = new CompoundParameter("Time", 30000, 0, 600000)
@@ -141,6 +210,127 @@ public class Countdown extends LXPattern {
     
     if (!flashModulator.isRunning() && (1 - countdownModulator.getValue()) * countdownModulator.getPeriod() < flashStart.getValue() + flashTime.getValue()) {
       flashModulator.trigger();
+    }
+  }
+}
+
+//@LXCategory("Form")
+//public static class ChasePattern extends LXPattern {
+//  public final CompoundParameter pos = new CompoundParameter("Pos", 0, 1)
+//    .setDescription("Position of the center of the plane");
+  
+//  public final CompoundParameter wth = new CompoundParameter("Width", .4, 0, 1)
+//    .setDescription("Thickness of the plane");
+  
+//  public ChasePattern(LX lx) {
+//    super(lx);
+//    addParameter("axis", this.axis);
+//    addParameter("pos", this.pos);
+//    addParameter("width", this.wth);
+//  }
+  
+//  public void run(double deltaMs) {
+//    Storytime story = (Storytime)lx.model;
+    
+//    for (LXPoint p : story.bothBooks()) {
+//    }
+//  }
+//}
+
+@LXCategory("Form")
+public class NoisePattern extends LXPattern {
+  public final CompoundParameter scale = new CompoundParameter("Scale", 0.2, 0, 1)
+    .setDescription("Noise scaling parameter");
+  
+  public final CompoundParameter xvel = new CompoundParameter("X Velocity", 0, -100, 100)
+    .setDescription("Velocity in X");
+  public final CompoundParameter yvel = new CompoundParameter("Y Velocity", 00, -100, 100)
+    .setDescription("Velocity in X");
+  public final CompoundParameter zvel = new CompoundParameter("Z Velocity", 00, -100, 100)
+    .setDescription("Velocity in X");
+  
+  private final Accelerator xoff = new Accelerator(0, xvel.getValue(), 0);
+  private final Accelerator yoff = new Accelerator(0, yvel.getValue(), 0);
+  private final Accelerator zoff = new Accelerator(0, zvel.getValue(), 0);
+  
+  public NoisePattern(LX lx) {
+    super(lx);
+    addParameter("scale", this.scale);
+    addParameter("xvel", this.xvel);
+    addParameter("yvel", this.yvel);
+    addParameter("zvel", this.zvel);
+    
+    addModulator(xoff);
+    addModulator(yoff);
+    addModulator(zoff);
+    
+    xoff.start();
+    yoff.start();
+    zoff.start();
+  }
+  
+  public void run(double deltaMs) {
+    Storytime story = (Storytime)lx.model;
+    
+    xoff.setVelocity(xvel.getValue());
+    yoff.setVelocity(yvel.getValue());
+    zoff.setVelocity(zvel.getValue());
+        
+    for (LXPoint p : lx.model.points) {
+      colors[p.index] = LXColor.gray(noise((p.x + xoff.getValuef()) * scale.getValuef(), (p.y + yoff.getValuef()) * scale.getValuef(), (p.z + zoff.getValuef()) * scale.getValuef()) * 100);
+    }
+  }
+}
+
+@LXCategory("Form")
+public static class Noise2DPattern extends LXPattern {
+  public static enum Axis {
+    X, Y, Z
+  };
+  
+  public final EnumParameter<Axis> axis =
+    new EnumParameter<Axis>("Axis", Axis.X)
+    .setDescription("Which axis the plane is drawn across");
+    
+  public final CompoundParameter scale = new CompoundParameter("Scale", 0.2, 0, 1)
+    .setDescription("Noise scaling parameter");
+  
+  public final CompoundParameter xvel = new CompoundParameter("X Velocity", 0, -100, 100)
+    .setDescription("Velocity in X");
+  public final CompoundParameter yvel = new CompoundParameter("Y Velocity", 00, -100, 100)
+    .setDescription("Velocity in X");
+  
+  private final Accelerator xoff = new Accelerator(0, xvel.getValue(), 0);
+  private final Accelerator yoff = new Accelerator(0, yvel.getValue(), 0);
+  
+  public Noise2DPattern(LX lx) {
+    super(lx);
+    addParameter("axis", this.axis);
+    addParameter("scale", this.scale);
+    addParameter("xvel", this.xvel);
+    addParameter("yvel", this.yvel);
+    
+    addModulator(xoff);
+    addModulator(yoff);
+    
+    xoff.start();
+    yoff.start();
+  }
+  
+  public void run(double deltaMs) {    
+    xoff.setVelocity(xvel.getValue());
+    yoff.setVelocity(yvel.getValue());
+        
+    for (LXPoint p : lx.model.points) {
+      float n = 0;
+      switch (this.axis.getEnum()) {
+        case X: n = p.x; break;
+        case Y: n = p.y; break;
+        case Z: n = p.z; break;
+      }
+    
+      
+      colors[p.index] = LXColor.gray(((P3LX)lx).applet.noise((n + xoff.getValuef()) * scale.getValuef(), yoff.getValuef() * scale.getValuef()) * 100);
     }
   }
 }
@@ -718,6 +908,5 @@ public static class ZigZagPattern extends LXPattern {
       reset();
     }
     mode1(this.pos1.getValuef(), this.pos2.getValuef());
-  }
-  
+  } 
 }

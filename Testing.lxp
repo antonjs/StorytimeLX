@@ -1,6 +1,6 @@
 {
   "version": "0.1",
-  "timestamp": 1626258349790,
+  "timestamp": 1626422718857,
   "engine": {
     "id": 1,
     "class": "heronarts.lx.LXEngine",
@@ -520,7 +520,7 @@
         },
         "effects": [],
         "clips": [],
-        "patternIndex": 1,
+        "patternIndex": 3,
         "patterns": [
           {
             "id": 743,
@@ -550,6 +550,45 @@
               "alpha": true,
               "trigger": false,
               "stop": false
+            },
+            "modulation": {
+              "modulators": [],
+              "modulations": [],
+              "triggers": []
+            },
+            "autoCycleEnabled": true
+          },
+          {
+            "id": 890,
+            "class": "StorytimeLX$NoisePattern",
+            "modulationColor": -16711837,
+            "parameters": {
+              "label": "Noise",
+              "scale": 0.5,
+              "xvel": 10.0,
+              "yvel": 10.0,
+              "zvel": 10.0
+            },
+            "modulation": {
+              "modulators": [],
+              "modulations": [],
+              "triggers": []
+            },
+            "autoCycleEnabled": true
+          },
+          {
+            "id": 1027,
+            "class": "StorytimeLX$PlaneCutPattern",
+            "modulationColor": -5767424,
+            "parameters": {
+              "label": "PlaneCut",
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0,
+              "pitch": 0.0,
+              "roll": 0.0,
+              "yaw": 0.0,
+              "width": 0.0
             },
             "modulation": {
               "modulators": [],
@@ -628,16 +667,16 @@
           "attack": 10.0,
           "release": 100.0,
           "slope": 4.5,
-          "Band-1": 0.3523086888662249,
-          "Band-2": 0.46854111646019225,
-          "Band-3": 0.5070426463888997,
-          "Band-4": 0.5443740296934403,
-          "Band-5": 0.6188000601637238,
-          "Band-6": 0.62461483901708,
-          "Band-7": 0.4202399943420948,
-          "Band-8": 0.2525539370871307,
-          "Band-9": 0.027629762848021877,
-          "Band-10": 0.02277682722147245,
+          "Band-1": 0.5517758223173987,
+          "Band-2": 0.5797142618912543,
+          "Band-3": 0.5634657871186086,
+          "Band-4": 0.5037679419654904,
+          "Band-5": 0.3754068889269263,
+          "Band-6": 0.08066926144002551,
+          "Band-7": 0.006130038639998503,
+          "Band-8": 0.02984517040129031,
+          "Band-9": 0.045386017277378676,
+          "Band-10": 0.0,
           "Band-11": 0.0,
           "Band-12": 0.0,
           "Band-13": 0.0,
@@ -727,8 +766,8 @@
         "camera": {
           "active": false,
           "radius": 235.80276835571894,
-          "theta": -0.6600000000000084,
-          "phi": 0.43571667385101553,
+          "theta": 0.632999999999991,
+          "phi": 0.6967166738510158,
           "x": 46.2126350402832,
           "y": -30.697914123535156,
           "z": -2.5372161865234375
@@ -737,8 +776,8 @@
           {
             "active": false,
             "radius": 235.80276835571894,
-            "theta": -0.6600000000000084,
-            "phi": 0.43571667385101553,
+            "theta": 0.632999999999991,
+            "phi": 0.6967166738510158,
             "x": 46.2126350402832,
             "y": -30.697914123535156,
             "z": -2.5372161865234375
