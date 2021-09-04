@@ -124,7 +124,7 @@ public class Countdown extends LXPattern {
       .setDescription("Flash for this long after the countdown finishes");
         public final BooleanParameter alpha = new BooleanParameter("Alpha", false)
       .setDescription("Transparent background for countdown");
-    public final BooleanParameter trigger = new BooleanParameter("Start", false)
+    public final BooleanParameter start = new BooleanParameter("Start", false)
       .setDescription("Start the countdown")
       .setMode(BooleanParameter.Mode.MOMENTARY);
     public final BooleanParameter stop = new BooleanParameter("Stop", false)
@@ -143,7 +143,7 @@ public class Countdown extends LXPattern {
     addParameter("flashStart", this.flashStart);
     addParameter("flashTime", this.flashTime);
     addParameter("alpha", this.alpha);
-    addParameter("trigger", this.trigger);
+    addParameter("start", this.start);
     addParameter("stop", this.stop);
         
     addModulator(this.countdownModulator);
@@ -156,7 +156,7 @@ public class Countdown extends LXPattern {
     countdownModulator.setPeriod(time);
     flashModulator.setLooping(false);
     
-    this.trigger.addListener(new LXParameterListener() {
+    this.start.addListener(new LXParameterListener() {
       public @Override
       void onParameterChanged(LXParameter param) {
         if (param.getValue() == 0) return;
@@ -763,8 +763,10 @@ public static class PremadeStainedGlassPattern extends LXPattern {
   LXPoint[][] ledGrid;
   int lastImageNum;
   int numLampStrips;
-  public final DiscreteParameter imageNum = new DiscreteParameter("imageNum", 0, 2)
+  public final DiscreteParameter imageNum = new DiscreteParameter("imageNum", 0, stainedGlass.length)
      .setDescription("Image number");
+     
+  public final BooleanParameter idLEDs = new BooleanParameter("id", false);
      
   public PremadeStainedGlassPattern(LX lx) {
     super(lx);
@@ -792,6 +794,28 @@ public static class PremadeStainedGlassPattern extends LXPattern {
     lastImageNum = 0;
     setImage(lastImageNum);
     addParameter("imageNum", this.imageNum);
+    addParameter("id", this.idLEDs);
+    
+    this.idLEDs.addListener(new LXParameterListener() {
+      public @Override
+      void onParameterChanged(LXParameter param) {
+        if (param.getValue() == 0) return;
+
+        println("LED ID:");
+        
+        HashMap<Integer, ArrayList<LXPoint>> map = new HashMap<Integer, ArrayList<LXPoint>>();
+        for (int x = 0; x < ledGrid.length; x++) {
+          for (int y = 0; y < ledGrid[x].length; y++) {
+            if (!map.containsKey(colors[ledGrid[x][y].index])) {
+              map.put(new Integer(colors[ledGrid[x][y].index]), new ArrayList<LXPoint>());
+            }
+            
+            ArrayList<LXPoint> points = map.get(new Integer(colors[ledGrid[x][y].index]));
+            points.add(ledGrid[x][y]);
+          }
+        }
+      }
+    });
   }
   
   public void setImage(int num) {
